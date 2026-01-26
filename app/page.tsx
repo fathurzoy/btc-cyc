@@ -338,3 +338,15 @@ export default function Home() {
     </div>
   );
 }
+
+// <!-- Google tag (gtag.js) -->
+// <script async src="https://www.googletagmanager.com/gtag/js?id=G-1K3K2FXBC0"></script>
+// <script>
+//   window.dataLayer = window.dataLayer || [];
+//   function gtag(){dataLayer.push(arguments);}
+//   gtag('js', new Date());
+
+//   gtag('config', 'G-1K3K2FXBC0');
+// </script>
+
+// G-1K3K2FXBC0
