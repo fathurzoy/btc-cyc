@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, type IChartApi, type ISeriesApi } from 'lightweight-charts';
+import { createChart, ColorType, type IChartApi, type ISeriesApi, type Time } from 'lightweight-charts';
 
 interface CandlestickData {
-  time: number;
+  time: Time;
   open: number;
   high: number;
   low: number;
@@ -13,8 +13,8 @@ interface CandlestickData {
 
 interface DateRange {
   name: string;
-  start: number;
-  end: number;
+  start: Time;
+  end: Time;
   color: string;
   borderColor: string;
   label: string;
@@ -23,32 +23,32 @@ interface DateRange {
 const DATE_RANGES: DateRange[] = [
   {
     name: 'Range 1',
-    start: Math.floor(new Date('2025-10-01').getTime() / 1000),
-    end: Math.floor(new Date('2025-10-29').getTime() / 1000),
+    start: Math.floor(new Date('2025-10-01').getTime() / 1000) as Time,
+    end: Math.floor(new Date('2025-10-29').getTime() / 1000) as Time,
     color: 'rgba(255, 152, 0, 0.15)',
     borderColor: '#FF9800',
     label: '1 Okt 2025 - 29 Okt 2025'
   },
   {
     name: 'Range 2',
-    start: Math.floor(new Date('2026-04-01').getTime() / 1000),
-    end: Math.floor(new Date('2026-06-01').getTime() / 1000),
+    start: Math.floor(new Date('2026-04-01').getTime() / 1000) as Time,
+    end: Math.floor(new Date('2026-06-01').getTime() / 1000) as Time,
     color: 'rgba(255, 152, 0, 0.15)',
     borderColor: '#FF9800',
     label: '1 Apr 2026 - 1 Jun 2026'
   },
   {
     name: 'Range 3',
-    start: Math.floor(new Date('2026-10-01').getTime() / 1000),
-    end: Math.floor(new Date('2026-12-31').getTime() / 1000),
+    start: Math.floor(new Date('2026-10-01').getTime() / 1000) as Time,
+    end: Math.floor(new Date('2026-12-31').getTime() / 1000) as Time,
     color: 'rgba(255, 152, 0, 0.15)',
     borderColor: '#FF9800',
     label: '1 Okt 2026 - 31 Des 2026'
   },
   {
     name: 'Range 4',
-    start: Math.floor(new Date('2027-03-01').getTime() / 1000),
-    end: Math.floor(new Date('2027-05-31').getTime() / 1000),
+    start: Math.floor(new Date('2027-03-01').getTime() / 1000) as Time,
+    end: Math.floor(new Date('2027-05-31').getTime() / 1000) as Time,
     color: 'rgba(255, 152, 0, 0.15)',
     borderColor: '#FF9800',
     label: '1 Mar 2027 - 31 Mei 2027'
@@ -91,7 +91,7 @@ export default function CryptoChart() {
       }
       
       const today = Math.floor(Date.now() / 1000);
-      const realDataOnly = result.data.filter((d: CandlestickData) => d.time <= today);
+      const realDataOnly = result.data.filter((d: CandlestickData) => (d.time as number) <= today);
       
       console.log(`Received ${result.data.length} data points, keeping ${realDataOnly.length} real data points`);
       
@@ -102,11 +102,11 @@ export default function CryptoChart() {
         const lastRealData = realDataOnly[realDataOnly.length - 1];
         const lastPrice = lastRealData.close;
         const dayInSeconds = 24 * 60 * 60;
-        let currentTime = lastRealData.time + dayInSeconds;
+        let currentTime = (lastRealData.time as number) + dayInSeconds;
         
         while (currentTime <= futureEndDate) {
           extendedData.push({
-            time: currentTime,
+            time: currentTime as Time,
             open: lastPrice,
             high: lastPrice,
             low: lastPrice,
@@ -203,7 +203,7 @@ export default function CryptoChart() {
       const today = Math.floor(Date.now() / 1000);
       
       DATE_RANGES.forEach((range) => {
-        const rangeData = data.filter(d => d.time >= range.start && d.time <= range.end);
+        const rangeData = data.filter(d => (d.time as number) >= (range.start as number) && (d.time as number) <= (range.end as number));
         
         if (rangeData.length > 0) {
           const minPrice = Math.min(...rangeData.map(d => d.low));
@@ -213,14 +213,13 @@ export default function CryptoChart() {
           const topValue = maxPrice + margin;
           const bottomValue = minPrice - margin;
           
-          const isFutureRange = range.start > today;
+          const isFutureRange = (range.start as number) > today;
 
           if (!isFutureRange) {
             const backgroundSeries = chart.addAreaSeries({
               topColor: range.color,
               bottomColor: range.color,
               lineColor: 'transparent',
-              lineWidth: 0,
               priceLineVisible: false,
               lastValueVisible: false,
               crosshairMarkerVisible: false,
@@ -237,7 +236,7 @@ export default function CryptoChart() {
 
           const topBorder = chart.addLineSeries({
             color: range.borderColor,
-            lineWidth: 3,
+            lineWidth: 3 as any,
             lineStyle: borderStyle,
             priceLineVisible: false,
             lastValueVisible: false,
@@ -250,7 +249,7 @@ export default function CryptoChart() {
 
           const bottomBorder = chart.addLineSeries({
             color: range.borderColor,
-            lineWidth: 3,
+            lineWidth: 3 as any,
             lineStyle: borderStyle,
             priceLineVisible: false,
             lastValueVisible: false,
