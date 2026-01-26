@@ -1,8 +1,10 @@
 'use client';
 
 import Script from 'next/script';
+import { useEffect } from 'react';
 
 export default function GoogleAnalytics({ measurementId }: { measurementId: string }) {
+
   return (
     <>
       <Script
