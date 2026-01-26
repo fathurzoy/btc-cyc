@@ -1,15 +1,13 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect } from 'react';
 
 export default function GoogleAnalytics({ measurementId }: { measurementId: string }) {
-
   return (
     <>
       <Script
         strategy="afterInteractive"
-        src={`https://www.googletagmanager.com/gtag/js?id=G-1K3K2FXBC0`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
       />
       <Script
         id="google-analytics"
@@ -19,7 +17,7 @@ export default function GoogleAnalytics({ measurementId }: { measurementId: stri
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-1K3K2FXBC0', {
+            gtag('config', '${measurementId}', {
               page_path: window.location.pathname,
             });
           `,
