@@ -24,6 +24,13 @@ export default function Home() {
                 Lihat WCL Chart
               </Link>
               <Link
+                href="/ath-atl"
+                className="px-8 py-4 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-all shadow-lg shadow-yellow-600/50 flex items-center justify-center gap-2"
+              >
+                <Target className="w-5 h-5" />
+                ATH-ATL Cycle
+              </Link>
+              <Link
                 href="/moon"
                 className="px-8 py-4 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all shadow-lg flex items-center justify-center gap-2"
               >
@@ -238,7 +245,7 @@ export default function Home() {
           <p className="text-gray-300 text-center mb-12 max-w-2xl mx-auto">
             Range box pada WCL Chart menunjukkan periode-periode kritis berdasarkan cycle theory
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border-l-4 border-orange-500">
               <h4 className="text-xl font-bold text-white mb-2">Range 1: 1 Okt 2025 - 29 Okt 2025</h4>
               <p className="text-gray-400">Window retest period pertama</p>
@@ -254,6 +261,56 @@ export default function Home() {
             <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border-l-4 border-orange-500">
               <h4 className="text-xl font-bold text-white mb-2">Range 4: 1 Mar 2027 - 31 Mei 2027</h4>
               <p className="text-gray-400">Extended cycle monitoring period</p>
+            </div>
+          </div>
+
+          {/* ATH-ATL Cycle Highlight */}
+          <div className="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 backdrop-blur-sm rounded-2xl p-8 border border-yellow-500/30">
+            <div className="flex items-center gap-4 mb-6">
+              <Target className="w-12 h-12 text-yellow-400" />
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold text-white">ATH-ATL Pattern Analysis</h3>
+                <p className="text-yellow-200">Prediksi berdasarkan pola historis 2015-2050</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="bg-green-900/30 rounded-xl p-4 border border-green-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="w-6 h-6 text-green-400" />
+                  <h4 className="text-lg font-bold text-green-300">ATL → ATH</h4>
+                </div>
+                <p className="text-3xl font-bold text-green-400">1064 hari</p>
+                <p className="text-sm text-gray-300">≈ 2.9 tahun bull run</p>
+              </div>
+              
+              <div className="bg-red-900/30 rounded-xl p-4 border border-red-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingDown className="w-6 h-6 text-red-400" />
+                  <h4 className="text-lg font-bold text-red-300">ATH → ATL</h4>
+                </div>
+                <p className="text-3xl font-bold text-red-400">364 hari</p>
+                <p className="text-sm text-gray-300">≈ 1 tahun bear market</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-800/50 rounded-xl p-4 mb-4">
+              <p className="text-yellow-100 text-center">
+                <strong>Prediksi ATH Berikutnya:</strong> 6 Oktober 2025
+              </p>
+              <p className="text-yellow-200 text-sm text-center mt-2">
+                "The pattern would print this cycle's ATH on the 6th of October 2025"
+              </p>
+            </div>
+
+            <div className="text-center">
+              <Link
+                href="/ath-atl"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 text-white rounded-lg font-semibold hover:bg-yellow-700 transition-all shadow-lg"
+              >
+                <Calendar className="w-5 h-5" />
+                Lihat Timeline Lengkap ATH-ATL (2015-2050)
+              </Link>
             </div>
           </div>
         </div>

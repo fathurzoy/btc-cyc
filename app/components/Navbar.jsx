@@ -11,6 +11,7 @@ export default function Navbar() {
     { href: '/', label: 'Home', icon: Home },
     { href: '/wcl', label: 'WCL Chart', icon: TrendingUp },
     { href: '/moon', label: 'Moon Phases', icon: Moon },
+    { href: '/ath-atl', label: 'ATH-ATL', icon: BookOpen },
   ];
 
   return (
