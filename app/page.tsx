@@ -15,26 +15,26 @@ export default function Home() {
             <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
               Memahami Siklus Pasar Cryptocurrency untuk Strategi Investasi yang Lebih Baik
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col gap-3 justify-center max-w-md mx-auto sm:max-w-none sm:flex-row sm:gap-4">
               <Link
                 href="/wcl"
-                className="px-8 py-4 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/50 flex items-center justify-center gap-2"
+                className="px-6 py-3 sm:px-8 sm:py-4 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/50 flex items-center justify-center gap-2 text-sm sm:text-base"
               >
-                <TrendingUp className="w-5 h-5" />
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
                 Lihat WCL Chart
               </Link>
               <Link
                 href="/ath-atl"
-                className="px-8 py-4 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-all shadow-lg shadow-yellow-600/50 flex items-center justify-center gap-2"
+                className="px-6 py-3 sm:px-8 sm:py-4 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-all shadow-lg shadow-yellow-600/50 flex items-center justify-center gap-2 text-sm sm:text-base"
               >
-                <Target className="w-5 h-5" />
+                <Target className="w-4 h-4 sm:w-5 sm:h-5" />
                 ATH-ATL Cycle
               </Link>
               <Link
                 href="/moon"
-                className="px-8 py-4 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all shadow-lg flex items-center justify-center gap-2"
+                className="px-6 py-3 sm:px-8 sm:py-4 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all shadow-lg flex items-center justify-center gap-2 text-sm sm:text-base"
               >
-                <Moon className="w-5 h-5" />
+                <Moon className="w-4 h-4 sm:w-5 sm:h-5" />
                 Moon Phase Predictor
               </Link>
             </div>

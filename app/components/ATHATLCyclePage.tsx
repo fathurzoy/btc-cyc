@@ -123,23 +123,23 @@ export default function ATHATLCyclePage() {
         </div>
 
         {/* Filter by Year */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-purple-500/20">
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-3 md:p-4 mb-6 border border-purple-500/20">
           <div className="flex flex-wrap gap-2 items-center justify-center">
             <button
               onClick={() => setSelectedYear(null)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              className={`px-3 py-2 text-sm md:text-base md:px-4 rounded-lg font-medium transition-all ${
                 selectedYear === null
                   ? 'bg-purple-600 text-white shadow-lg'
                   : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
               }`}
             >
-              Semua Tahun
+              Semua
             </button>
             {[...new Set(CYCLE_DATA.map(c => c.year))].map((year) => (
               <button
                 key={year}
                 onClick={() => setSelectedYear(year)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-3 py-2 text-sm md:text-base md:px-4 rounded-lg font-medium transition-all ${
                   selectedYear === year
                     ? 'bg-purple-600 text-white shadow-lg'
                     : year <= currentYear
@@ -154,67 +154,71 @@ export default function ATHATLCyclePage() {
         </div>
 
         {/* Timeline Visualization */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 mb-8 border border-purple-500/20">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">
+        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 md:p-6 lg:p-8 mb-8 border border-purple-500/20">
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-6 text-center">
             Timeline Siklus Bitcoin
           </h2>
           
           <div className="relative">
             {/* Timeline Line */}
-            <div className="absolute left-8 top-0 bottom-0 w-1 bg-gradient-to-b from-green-500 via-purple-500 to-red-500"></div>
+            <div className="absolute left-4 md:left-8 top-0 bottom-0 w-0.5 md:w-1 bg-gradient-to-b from-green-500 via-purple-500 to-red-500"></div>
             
             {/* Timeline Events */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {filteredData.map((cycle, index) => {
                 const isATH = cycle.type === 'ATH';
                 const isPast = cycle.year <= currentYear;
                 const isCurrent = cycle.year === currentYear;
                 
                 return (
-                  <div key={cycle.no} className="relative pl-20">
+                  <div key={cycle.no} className="relative pl-12 md:pl-20">
                     {/* Timeline Dot */}
-                    <div className={`absolute left-6 top-6 w-5 h-5 rounded-full border-4 ${
+                    <div className={`absolute left-2.5 md:left-6 top-4 md:top-6 w-3 h-3 md:w-5 md:h-5 rounded-full border-2 md:border-4 ${
                       isATH 
                         ? 'bg-green-400 border-green-600' 
                         : 'bg-red-400 border-red-600'
-                    } ${isCurrent ? 'ring-4 ring-yellow-400 animate-pulse' : ''}`}></div>
+                    } ${isCurrent ? 'ring-2 md:ring-4 ring-yellow-400 animate-pulse' : ''}`}></div>
                     
                     {/* Event Card */}
                     <div className={`bg-gradient-to-r ${
                       isATH
                         ? 'from-green-900/30 to-green-800/20 border-green-500/30'
                         : 'from-red-900/30 to-red-800/20 border-red-500/30'
-                    } border rounded-xl p-4 md:p-6 transition-all hover:scale-[1.02] ${
-                      isCurrent ? 'ring-2 ring-yellow-400 shadow-xl shadow-yellow-400/20' : ''
+                    } border rounded-xl p-3 md:p-4 lg:p-6 transition-all hover:scale-[1.01] md:hover:scale-[1.02] ${
+                      isCurrent ? 'ring-1 md:ring-2 ring-yellow-400 shadow-xl shadow-yellow-400/20' : ''
                     } ${!isPast ? 'opacity-70' : ''}`}>
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex flex-col gap-3 md:gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            {isATH ? (
-                              <TrendingUp className="w-6 h-6 text-green-400" />
-                            ) : (
-                              <TrendingDown className="w-6 h-6 text-red-400" />
-                            )}
-                            <h3 className={`text-xl md:text-2xl font-bold ${
-                              isATH ? 'text-green-300' : 'text-red-300'
-                            }`}>
-                              {cycle.from} → {cycle.to}
-                            </h3>
-                            {isCurrent && (
-                              <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">
-                                SEKARANG
-                              </span>
-                            )}
-                            {!isPast && (
-                              <span className="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded">
-                                PREDIKSI
-                              </span>
-                            )}
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2">
+                              {isATH ? (
+                                <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-green-400 flex-shrink-0" />
+                              ) : (
+                                <TrendingDown className="w-5 h-5 md:w-6 md:h-6 text-red-400 flex-shrink-0" />
+                              )}
+                              <h3 className={`text-base md:text-xl lg:text-2xl font-bold ${
+                                isATH ? 'text-green-300' : 'text-red-300'
+                              }`}>
+                                {cycle.from} → {cycle.to}
+                              </h3>
+                            </div>
+                            <div className="flex gap-2">
+                              {isCurrent && (
+                                <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded inline-block">
+                                  SEKARANG
+                                </span>
+                              )}
+                              {!isPast && (
+                                <span className="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded inline-block">
+                                  PREDIKSI
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-gray-300 mb-2">{cycle.description}</p>
-                          <div className="flex flex-wrap gap-3 text-sm">
+                          <p className="text-sm md:text-base text-gray-300 mb-2">{cycle.description}</p>
+                          <div className="flex flex-wrap gap-2 md:gap-3 text-xs md:text-sm">
                             <span className="flex items-center gap-1 text-gray-400">
-                              <Calendar className="w-4 h-4" />
+                              <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                               {cycle.date}
                             </span>
                             <span className="text-purple-300 font-semibold">
@@ -222,13 +226,13 @@ export default function ATHATLCyclePage() {
                             </span>
                           </div>
                         </div>
-                        <div className={`text-center px-6 py-3 rounded-lg ${
+                        <div className={`text-center px-4 py-2 md:px-6 md:py-3 rounded-lg ${
                           isATH
                             ? 'bg-green-500/20 border border-green-500/40'
                             : 'bg-red-500/20 border border-red-500/40'
                         }`}>
                           <div className="text-xs text-gray-400 mb-1">Tahun</div>
-                          <div className={`text-3xl font-bold ${
+                          <div className={`text-2xl md:text-3xl font-bold ${
                             isATH ? 'text-green-400' : 'text-red-400'
                           }`}>
                             {cycle.year}
