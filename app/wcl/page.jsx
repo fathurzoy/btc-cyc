@@ -19,7 +19,7 @@ export default function WCLPage() {
 
         <div className="mt-4 md:mt-6 bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-3 md:p-4">
           <p className="text-yellow-200 text-xs md:text-sm text-center">
-            ⚠️ Disclaimer: Masih dalam pengembangan, belum tau range pasti ketika WCL akan muncul, DCL belum ditambahkan, YCL belum ditambahkan. Kalau ingin membantu untuk menambahkan range pasti ketika WCL muncul, silahkan hubungi saya telegram di <a href="https://t.me/ozanoz007" className="underline font-semibold">@ozanoz007</a>
+            ⚠️ Disclaimer: Masih dalam pengembangan, belum tau range pasti ketika WCL akan muncul, DCL belum ditambahkan, YCL belum ditambahkan. Saya perlu dcl wcl ycl minimal 4 data range yang udh kejadian dan 1 range data dimasadepan, Kalau ingin membantu saya, silahkan hubungi saya telegram di <a href="https://t.me/ozanoz007" className="underline font-semibold">@ozanoz007</a>
           </p>
         </div>
         
