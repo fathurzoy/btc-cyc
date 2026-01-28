@@ -15,8 +15,16 @@ export default function WCLPage() {
             Data real-time dari CryptoCompare API
           </p>
         </div>
+
+
+        <div className="mt-4 md:mt-6 bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-3 md:p-4">
+          <p className="text-yellow-200 text-xs md:text-sm text-center">
+            ⚠️ Disclaimer: Masih dalam pengembangan, belum tau range pasti ketika WCL akan muncul, DCL belum ditambahkan, YCL belum ditambahkan. Kalau ingin membantu untuk menambahkan range pasti ketika WCL muncul, silahkan hubungi saya telegram di <a href="https://t.me/ozanoz007" className="underline font-semibold">@ozanoz007</a>
+          </p>
+        </div>
         
         <CryptoChart />
+
         
         {/* Explanation Section */}
         <div className="mt-12 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-purple-500/20">
@@ -66,6 +74,8 @@ export default function WCLPage() {
             </div>
           </div>
         </div>
+
+       
 
         <footer className="mt-8 md:mt-12 text-center text-white/70 text-sm">
           <p>Real-time Bitcoin price data powered by CryptoCompare</p>
