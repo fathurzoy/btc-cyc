@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { TrendingUp, Moon, Home, BookOpen, Menu, X } from 'lucide-react';
+import { TrendingUp, Moon, Home, BookOpen, Menu, X, Star } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Navbar() {
@@ -14,6 +14,7 @@ export default function Navbar() {
     { href: '/wcl', label: 'WCL Chart', icon: TrendingUp },
     { href: '/moon', label: 'Moon Phases', icon: Moon },
     { href: '/ath-atl', label: 'ATH-ATL', icon: BookOpen },
+    { href: '/time-trading', label: 'Time Trading', icon: Star },
   ];
 
   const toggleMobileMenu = () => {
