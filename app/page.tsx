@@ -24,6 +24,13 @@ export default function Home() {
                 Lihat WCL Chart
               </Link>
               <Link
+                href="/dcl"
+                className="px-6 py-3 sm:px-8 sm:py-4 bg-gray-600 text-white rounded-xl font-semibold hover:bg-gray-700 transition-all shadow-lg shadow-gray-600/50 flex items-center justify-center gap-2 text-sm sm:text-base"
+              >
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
+                Lihat DCL Chart
+              </Link>
+              <Link
                 href="/ath-atl"
                 className="px-6 py-3 sm:px-8 sm:py-4 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-all shadow-lg shadow-yellow-600/50 flex items-center justify-center gap-2 text-sm sm:text-base"
               >

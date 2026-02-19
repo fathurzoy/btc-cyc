@@ -12,6 +12,7 @@ export default function Navbar() {
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/wcl', label: 'WCL Chart', icon: TrendingUp },
+    { href: '/dcl', label: 'DCL Chart', icon: TrendingUp },
     { href: '/moon', label: 'Moon Phases', icon: Moon },
     { href: '/ath-atl', label: 'ATH-ATL', icon: BookOpen },
     { href: '/time-trading', label: 'Time Trading', icon: Star },
@@ -45,16 +46,15 @@ export default function Navbar() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
-              
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                    isActive
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isActive
                       ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
                       : 'text-gray-300 hover:bg-slate-800 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-base font-medium">
@@ -87,17 +87,16 @@ export default function Navbar() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
-              
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={closeMobileMenu}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
                       ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
                       : 'text-gray-300 hover:bg-slate-800 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="text-base font-medium">
