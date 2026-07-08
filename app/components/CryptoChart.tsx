@@ -22,7 +22,6 @@ interface DateRange {
   isProjection?: boolean;
 }
 
-// Keep historical ranges as static/verified
 const STATIC_RANGES: DateRange[] = [
   {
     name: 'Range 1',
@@ -50,7 +49,7 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
     currentPrice: 0,
     change24h: 0,
     dataPoints: 0,
-    source: 'CryptoCompare'
+    source: 'Coinbase Exchange'
   });
   const [activeRanges, setActiveRanges] = useState<DateRange[]>(STATIC_RANGES);
   const [wclInfo, setWclInfo] = useState<{lastLowDate: string, lastLowPrice: number} | null>(null);
@@ -64,72 +63,48 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
 
   const findRecentMajorLow = (data: CandlestickData[]) => {
     if (data.length < 30) return null;
-    
-    // Look back approx 300 days (or all data if less)
-    const lookbackDays = 300;
-    const startIndex = Math.max(0, data.length - lookbackDays);
-    const recentData = data.slice(startIndex);
-
+    const recentData = data.slice(Math.max(0, data.length - 300));
     if (recentData.length === 0) return null;
 
-    // Find the absolute lowest point
     let minLow = recentData[0].low;
     let minIndex = 0;
-
     for (let i = 1; i < recentData.length; i++) {
-        if (recentData[i].low < minLow) {
-            minLow = recentData[i].low;
-            minIndex = i;
-        }
+      if (recentData[i].low < minLow) {
+        minLow = recentData[i].low;
+        minIndex = i;
+      }
     }
-
     return recentData[minIndex];
   };
 
   const calculateProjectedRanges = (lastLowTime: number): DateRange[] => {
-    // Only WCL has dynamic projection for now
     if (mode !== 'wcl') return [];
+    const weekSeconds = 86400 * 7;
+    const p1Start = lastLowTime + 28 * weekSeconds;
+    const p1End = lastLowTime + 32 * weekSeconds;
+    const p2Start = p1Start + 28 * weekSeconds;
+    const p2End = p2Start + 6 * weekSeconds;
 
-    const ranges: DateRange[] = [];
-    const oneDaySeconds = 86400;
-    const weekSeconds = oneDaySeconds * 7;
-    
-    // Cycle Settings: 28 Weeks Interval
-    const startWeek = 28;
-    const endWeek = 32;
-    
-    // Projection 1
-    const p1Start = lastLowTime + (startWeek * weekSeconds);
-    const p1End = lastLowTime + (endWeek * weekSeconds);
-    const p1StartDate = new Date(p1Start * 1000);
-    const p1EndDate = new Date(p1End * 1000);
-
-    ranges.push({
+    return [
+      {
         name: 'Next WCL',
         start: p1Start as Time,
         end: p1End as Time,
-        color: 'rgba(147, 51, 234, 0.15)', // Purple for predicted
+        color: 'rgba(147, 51, 234, 0.15)',
         borderColor: '#9333ea',
-        label: `${p1StartDate.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})} - ${p1EndDate.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})}`,
+        label: `${new Date(p1Start * 1000).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})} - ${new Date(p1End * 1000).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})}`,
         isProjection: true
-    });
-
-    // Projection 2 (Next cycle)
-    const p2Start = p1Start + (startWeek * weekSeconds);
-    const p2End = p2Start + ((endWeek - startWeek + 2) * weekSeconds);
-    const p2StartDate = new Date(p2Start * 1000);
-
-    ranges.push({
+      },
+      {
         name: 'WCL +1',
         start: p2Start as Time,
         end: p2End as Time,
         color: 'rgba(147, 51, 234, 0.1)',
         borderColor: '#9333ea',
-        label: `${p2StartDate.toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})} (Est.)`,
+        label: `${new Date(p2Start * 1000).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})} (Est.)`,
         isProjection: true
-    });
-
-    return ranges;
+      }
+    ];
   };
 
   const fetchData = async () => {
@@ -139,7 +114,17 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
       
       const rangeLabel = activeYearRange ? `${activeYearRange.start}-${activeYearRange.end}` : 'All Time';
       console.log(`Fetching data... Mode: ${mode}, Range: ${rangeLabel}`);
-      const response = await fetch(`/api/crypto?t=${Date.now()}`);
+      const now = Math.floor(Date.now() / 1000);
+      const lookbackDays = mode === 'wcl' ? 420 : 120;
+      const selectedStart = activeYearRange
+        ? Date.UTC(activeYearRange.start, 0, 1) / 1000
+        : now - lookbackDays * 86400;
+      const selectedEnd = activeYearRange
+        ? Date.UTC(activeYearRange.end, 11, 31) / 1000
+        : now;
+      const requestTo = Math.min(now, selectedEnd);
+      const requestFrom = Math.min(selectedStart - lookbackDays * 86400, requestTo - lookbackDays * 86400);
+      const response = await fetch(`/api/crypto?from=${Math.floor(requestFrom)}&to=${Math.floor(requestTo)}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -151,19 +136,14 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
         throw new Error(result.message || 'API error');
       }
       
-      let allData: CandlestickData[] = result.data;
+      const allData: CandlestickData[] = result.data;
       
-      const today = Math.floor(Date.now() / 1000);
-      const realDataOnlyFull = allData.filter((d: CandlestickData) => (d.time as number) <= today);
-      
+      const realData = allData.filter((d: CandlestickData) => (d.time as number) <= now);
       let combinedRanges: DateRange[] = [];
 
       if (mode === 'wcl') {
-        // --- WCL Logic ---
-        // Use FULL history for detection, not just selected year
-        const majorLow = findRecentMajorLow(realDataOnlyFull);
+        const majorLow = findRecentMajorLow(realData);
         let dynamicRanges: DateRange[] = [];
-        
         if (majorLow) {
             setWclInfo({
                 lastLowDate: new Date((majorLow.time as number) * 1000).toLocaleDateString('id-ID', {
@@ -176,33 +156,25 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
             setWclInfo(null);
         }
 
-        // Theoretical WCL
-        const theoreticalRaw = generateTheoreticalWCL();
-        const theoreticalRanges: DateRange[] = theoreticalRaw.map(t => ({
-            name: t.label,
-            start: Math.floor(t.start.getTime() / 1000) as Time,
-            end: Math.floor(t.end.getTime() / 1000) as Time,
-            color: 'rgba(234, 179, 8, 0.15)', // Gold for WCL
-            borderColor: '#eab308',
-            label: t.label
+        const theoreticalRanges: DateRange[] = generateTheoreticalWCL().map(t => ({
+          name: t.label,
+          start: Math.floor(t.start.getTime() / 1000) as Time,
+          end: Math.floor(t.end.getTime() / 1000) as Time,
+          color: 'rgba(234, 179, 8, 0.15)',
+          borderColor: '#eab308',
+          label: t.label
         }));
-        
         combinedRanges = [...STATIC_RANGES, ...dynamicRanges, ...theoreticalRanges];
-
       } else {
-        // --- DCL Logic ---
         setWclInfo(null);
-        const theoreticalRaw = generateTheoreticalDCL();
-        const theoreticalRanges: DateRange[] = theoreticalRaw.map(t => ({
-            name: t.label,
-            start: Math.floor(t.start.getTime() / 1000) as Time,
-            end: Math.floor(t.end.getTime() / 1000) as Time,
-            color: 'rgba(156, 163, 175, 0.15)', // Grey for DCL
-            borderColor: '#9ca3af',
-            label: t.label
+        combinedRanges = generateTheoreticalDCL().map(t => ({
+          name: t.label,
+          start: Math.floor(t.start.getTime() / 1000) as Time,
+          end: Math.floor(t.end.getTime() / 1000) as Time,
+          color: 'rgba(156, 163, 175, 0.15)',
+          borderColor: '#9ca3af',
+          label: t.label
         }));
-        
-        combinedRanges = [...theoreticalRanges];
       }
 
       // --- Filter Data & Ranges by Year Range (Display Only) ---
@@ -239,7 +211,7 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
             currentPrice: latest.close,
             change24h: previous ? ((latest.close - previous.close) / previous.close) * 100 : 0,
             dataPoints: allData.length,
-            source: result.source || 'CryptoCompare'
+            source: result.source || 'Coinbase Exchange'
         });
       }
       
@@ -342,14 +314,12 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
 
         const topValue = maxPrice + margin;
         const bottomValue = minPrice - margin;
-        
         const isTheoretical = range.name.includes('Theoretical') || range.name.includes('DCL');
         const isFutureRange = (range.start as number) > today || range.isProjection;
 
         // Draw background
-        if (!isFutureRange || isTheoretical) { 
-          if (!isFutureRange || isTheoretical) {
-            const backgroundSeries = chart.addAreaSeries({
+        if (!isFutureRange || isTheoretical) {
+          const backgroundSeries = chart.addAreaSeries({
                 topColor: range.color,
                 bottomColor: range.color.replace('0.15', '0.05'),
                 lineColor: 'transparent',
@@ -362,15 +332,14 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
                 { time: range.start, value: topValue },
                 { time: range.end, value: topValue },
             ];
-            backgroundSeries.setData(areaData);
-          }
+          backgroundSeries.setData(areaData);
         }
 
-        const borderStyle = (isFutureRange && !isTheoretical) ? 2 : 0; 
+        const borderStyle = (isFutureRange && !isTheoretical) ? 2 : 0;
 
         const topBorder = chart.addLineSeries({
           color: range.borderColor,
-          lineWidth: isTheoretical ? 1 : 2 as any,
+          lineWidth: isTheoretical ? 1 : 2,
           lineStyle: borderStyle,
           priceLineVisible: false,
           lastValueVisible: false,
@@ -383,7 +352,7 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
 
         const bottomBorder = chart.addLineSeries({
           color: range.borderColor,
-          lineWidth: isTheoretical ? 1 : 2 as any,
+          lineWidth: isTheoretical ? 1 : 2,
           lineStyle: borderStyle,
           priceLineVisible: false,
           lastValueVisible: false,
@@ -395,7 +364,7 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
         ]);
       });
 
-      chart.timeScale().fitContent();
+      if (!activeYearRange) chart.timeScale().fitContent();
 
       const handleResize = () => {
         if (chartContainerRef.current && chartRef.current) {
@@ -403,7 +372,7 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
             chartRef.current.applyOptions({ 
               width: chartContainerRef.current.clientWidth 
             });
-          } catch (error) { }
+          } catch { }
         }
       };
 
@@ -415,7 +384,7 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
           try {
             chartRef.current.remove();
             chartRef.current = null;
-          } catch (error) { }
+          } catch { }
         }
       };
     }, 10);
@@ -431,7 +400,7 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
       <div className="flex items-center justify-center h-96 bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-purple-500/20">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-300 font-medium">Loading {mode === 'dcl' ? 'DCL' : 'WCL'} Data {selectedYear}...</p>
+          <p className="text-lg text-gray-300 font-medium">Loading {mode.toUpperCase()} data pasar...</p>
         </div>
       </div>
     );
@@ -458,7 +427,7 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
         {mode === 'wcl' && wclInfo && (
             <div className="mt-4 mb-4 bg-purple-900/20 border border-purple-500/30 rounded-lg p-3 text-center">
                 <p className="text-purple-200 text-sm">
-                    <strong>Last Major Low Detected:</strong> {wclInfo.lastLowDate} @ ${wclInfo.lastLowPrice.toLocaleString()} 
+                    <strong>Last Major Low Detected:</strong> {wclInfo.lastLowDate} @ ${wclInfo.lastLowPrice.toLocaleString()}
                     <span className="mx-2">•</span>
                     Projection Base: 28 weeks
                 </p>
@@ -513,9 +482,9 @@ export default function CryptoChart({ mode = 'wcl', yearRange, selectedYear }: C
             <p className="text-2xl font-bold">{mode.toUpperCase()}</p>
         </div>
          <div className="bg-gradient-to-br from-violet-600 to-violet-800 rounded-xl p-6 text-white shadow-xl">
-            <h3 className="text-xs uppercase opacity-90 mb-2 font-semibold">Active Year</h3>
+            <h3 className="text-xs uppercase opacity-90 mb-2 font-semibold">Sumber / Rentang</h3>
             <p className="text-lg font-bold leading-tight">
-                {selectedYear || 'All Time'}
+                {stats.source} · {activeYearRange ? `${activeYearRange.start}${activeYearRange.end !== activeYearRange.start ? `–${activeYearRange.end}` : ''}` : 'terbaru'}
             </p>
         </div>
       </div>

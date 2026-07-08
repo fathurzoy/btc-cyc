@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { TrendingUp, Moon, Home, BookOpen, Menu, X, Star } from 'lucide-react';
+import { TrendingUp, Moon, Home, BookOpen, Menu, X, Star, Eclipse } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Navbar() {
@@ -16,6 +16,7 @@ export default function Navbar() {
     { href: '/moon', label: 'Moon Phases', icon: Moon },
     { href: '/ath-atl', label: 'ATH-ATL', icon: BookOpen },
     { href: '/time-trading', label: 'Time Trading', icon: Star },
+    { href: '/astrology', label: 'Astro Events', icon: Eclipse },
   ];
 
   const toggleMobileMenu = () => {
@@ -52,8 +53,8 @@ export default function Navbar() {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${isActive
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
-                      : 'text-gray-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
+                    : 'text-gray-300 hover:bg-slate-800 hover:text-white'
                     }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -94,8 +95,8 @@ export default function Navbar() {
                   href={item.href}
                   onClick={closeMobileMenu}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
-                      : 'text-gray-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/50'
+                    : 'text-gray-300 hover:bg-slate-800 hover:text-white'
                     }`}
                 >
                   <Icon className="w-5 h-5" />

@@ -29,7 +29,7 @@ export default function DCLPage() {
             Bitcoin Price dengan Range Box Harian (60 Hari)
           </p>
           <p className="text-sm md:text-base text-gray-500 mt-2">
-            Data real-time dari CryptoCompare API
+            Candle harian BTC-USD dari Coinbase Exchange
           </p>
         </div>
 
@@ -115,7 +115,7 @@ export default function DCLPage() {
         </div>
 
         <footer className="mt-8 md:mt-12 text-center text-white/50 text-sm">
-          <p>Real-time Bitcoin price data powered by CryptoCompare</p>
+          <p>BTC-USD daily candles powered by Coinbase Exchange</p>
           <p className="mt-1">© 2026 Crypto Cycle Analyzer</p>
         </footer>
       </div>

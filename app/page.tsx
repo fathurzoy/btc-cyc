@@ -306,7 +306,7 @@ export default function Home() {
                 <strong>Prediksi ATH Berikutnya:</strong> 6 Oktober 2025
               </p>
               <p className="text-yellow-200 text-sm text-center mt-2">
-                "The pattern would print this cycle's ATH on the 6th of October 2025"
+                &quot;The pattern would print this cycle&apos;s ATH on the 6th of October 2025&quot;
               </p>
             </div>
 

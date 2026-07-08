@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Star, TrendingUp, TrendingDown, Calendar, Info } from 'lucide-react';
+import astronomyData from '../data/astronomy-events.json';
 
 const TimeTradingCalendar = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -16,111 +17,35 @@ const TimeTradingCalendar = () => {
 
   const years = Array.from({ length: 17 }, (_, i) => 2024 + i);
 
-  const astronacciVerifiedData = [
-    { year: 2025, month: 7, day: 1, type: 'Apogee Bottom', description: 'Swing Low H+1 reversal point (Verified)', confidence: 'high', distance: '>430,000 km', verified: true },
-    { year: 2025, month: 7, day: 30, type: 'Apogee Bottom', description: 'Swing Low H+1 support level (Verified)', confidence: 'high', distance: '>430,000 km', verified: true },
-    { year: 2025, month: 9, day: 23, type: 'Apogee Bottom', description: 'Swing Low H-1 bottom formation (Verified)', confidence: 'high', distance: '>430,000 km', verified: true },
-    { year: 2025, month: 10, day: 20, type: 'Apogee Bottom', description: 'Swing Low H+1 strong support (Verified)', confidence: 'high', distance: '>430,000 km', verified: true },
-    { year: 2025, month: 11, day: 17, type: 'Apogee Bottom', description: 'Swing Low H+1 year-end accumulation (Verified)', confidence: 'high', distance: '>430,000 km', verified: true },
-    { year: 2026, month: 0, day: 13, type: 'Perigee Top', description: 'Swing High - Peak before reversal (Verified)', confidence: 'high', distance: '<360,000 km', verified: true },
-    { year: 2026, month: 0, day: 28, type: 'Apogee Bottom', description: 'IHSG correlation reversal +2 (Verified)', confidence: 'medium', distance: '>430,000 km', verified: true },
-    { year: 2026, month: 1, day: 10, type: 'Apogee Bottom', description: 'Potential Bottom - Target reversal ±1 day (Verified)', confidence: 'high', distance: '>430,000 km', verified: true },
-    { year: 2026, month: 1, day: 11, type: 'Apogee Confirmation', description: 'Bottom confirmation day (Verified)', confidence: 'high', distance: '>430,000 km', verified: true },
-    { year: 2026, month: 1, day: 24, type: 'Apogee Support', description: 'Next time support level (Verified)', confidence: 'medium', distance: '>430,000 km', verified: true },
-  ];
-
-  const calculateApogeePerigee = (year, month) => {
-    const data = [];
-    const lunarCycle = 27.55455;
-    const baseApogee = new Date(2024, 0, 13);
-    
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0);
-    
-    let currentApogee = new Date(baseApogee);
-    
-    while (currentApogee < startDate) {
-      currentApogee.setDate(currentApogee.getDate() + lunarCycle);
-    }
-    
-    while (currentApogee <= endDate) {
-      if (currentApogee.getMonth() === month) {
-        const perigee = new Date(currentApogee);
-        perigee.setDate(perigee.getDate() - Math.floor(lunarCycle / 2));
-        
-        if (perigee.getMonth() === month) {
-          data.push({
-            date: perigee.getDate(),
-            type: 'Perigee',
-            description: 'Bulan dekat Bumi (<360,000 km) - Historis: Swing High/Top',
-            trend: 'bearish',
-            confidence: 'high',
-            distance: '<360,000 km'
-          });
-        }
-        
-        data.push({
-          date: currentApogee.getDate(),
-          type: 'Apogee',
-          description: 'Bulan jauh dari Bumi (>430,000 km) - Historis: Swing Low/Bottom',
-          trend: 'bullish',
-          confidence: 'high',
-          distance: '>430,000 km'
-        });
-      }
-      
-      currentApogee.setDate(currentApogee.getDate() + lunarCycle);
-    }
-    
-    return data;
-  };
-
   useEffect(() => {
     const firstDay = new Date(selectedYear, selectedMonth, 1);
     const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    
-    // Get verified data from video
-    const verifiedData = astronacciVerifiedData.filter(
-      d => d.year === selectedYear && d.month === selectedMonth
-    );
-    
-    // Calculate Apogee-Perigee for this month
-    const calculatedApogee = calculateApogeePerigee(selectedYear, selectedMonth);
-    
-    // Combine: prioritize verified data, then add calculated data that doesn't conflict
-    const allData = [...verifiedData];
-    
-    calculatedApogee.forEach(calc => {
-      // Check if there's already verified data within ±2 days of this calculated date
-      const hasNearbyVerified = verifiedData.find(v => Math.abs(v.day - calc.date) <= 2);
-      
-      if (!hasNearbyVerified) {
-        // Check if exact day already exists
-        const isDuplicate = allData.find(a => a.day === calc.date);
-        if (!isDuplicate) {
-          allData.push({
-            year: selectedYear,
-            month: selectedMonth,
-            day: calc.date,
-            type: calc.type,
-            description: calc.description,
-            confidence: calc.confidence,
-            distance: calc.distance,
-            verified: false
-          });
-        }
-      }
-    });
-    
+
+    const allData = astronomyData.apsides
+      .map(event => ({ event, date: new Date(event.at) }))
+      .filter(({ date }) => date.getUTCFullYear() === selectedYear && date.getUTCMonth() === selectedMonth)
+      .map(({ event, date }) => ({
+        year: selectedYear,
+        month: selectedMonth,
+        day: date.getUTCDate(),
+        type: event.kind === 'apogee' ? 'Apogee' : 'Perigee',
+        description: event.kind === 'apogee'
+          ? 'Jarak Bulan maksimum dari pusat Bumi (peristiwa astronomi)'
+          : 'Jarak Bulan minimum dari pusat Bumi (peristiwa astronomi)',
+        confidence: 'ephemeris',
+        distance: `${event.distanceKm.toLocaleString('en-US')} km`,
+        verified: true,
+      }));
+
     setApogeeData(allData.sort((a, b) => a.day - b.day));
-    
+
     const calendarData = [];
     for (let i = 0; i < startingDayOfWeek; i++) {
       calendarData.push(null);
     }
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       const event = allData.find(d => d.day === day);
       calendarData.push({
@@ -129,7 +54,7 @@ const TimeTradingCalendar = () => {
         event
       });
     }
-    
+
     setCalendar(calendarData);
   }, [selectedMonth, selectedYear]);
 
@@ -181,14 +106,14 @@ const TimeTradingCalendar = () => {
             <Calendar className="w-8 h-8 md:w-10 md:h-10 text-yellow-400" />
           </div>
           <p className="text-gray-300 text-sm md:text-lg px-4">
-            Analisis Bitcoin berdasarkan Apogee-Perigee (Jarak Bulan dari Bumi) - 2014-2030
+            Kalender ephemeris Apogee–Perigee Bulan (UTC) — 2024–2040
           </p>
         </div>
 
         <div className="bg-gradient-to-r from-yellow-900/40 to-orange-900/40 backdrop-blur-sm rounded-xl p-4 md:p-6 mb-4 md:mb-6 border border-yellow-500/30">
           <h3 className="text-lg md:text-xl font-bold text-yellow-300 mb-3 flex items-center gap-2">
             <Info className="w-5 h-5 md:w-6 md:h-6" />
-            Teori Time Trading - Astronacci (dari Video YouTube)
+            Data Astronomi dan Hipotesis Time Trading
           </h3>
           <div className="space-y-3 text-gray-300 text-sm md:text-base">
             <div className="bg-green-900/30 border border-green-500/30 rounded-lg p-3">
@@ -196,16 +121,16 @@ const TimeTradingCalendar = () => {
                 📍 APOGEE (Bulan Jauh dari Bumi)
               </p>
               <p className="text-sm">
-                <strong className="text-green-400">Jarak: &gt;430,000 km</strong> dari Bumi
+                Jarak maksimum Bulan dari pusat Bumi, dihitung dari ephemeris.
               </p>
               <p className="text-sm">
-                <strong className="text-green-400">Efek Market:</strong> Historis menunjukkan area <strong>BOTTOM/SWING LOW</strong> → Peluang BUY
+                <strong>Hipotesis market:</strong> sebagian trader memantau area ini sebagai kandidat swing low; bukan sinyal beli otomatis.
               </p>
               <p className="text-sm">
-                <strong className="text-green-400">Contoh dari Video:</strong> 1 Agustus, 30 Agustus, 23 Oktober, 20 Nov, 17 Des 2025, 10-11 Feb 2026
+                Wajib diuji terhadap data harga dan dikonfirmasi dengan price action.
               </p>
               <p className="text-xs text-green-300 mt-2">
-                💡 Garis kuning di chart Astronacci = Area Apogee ini
+                Nilai jarak aktual ditampilkan untuk setiap kejadian.
               </p>
             </div>
 
@@ -214,25 +139,24 @@ const TimeTradingCalendar = () => {
                 📍 PERIGEE (Bulan Dekat dengan Bumi)
               </p>
               <p className="text-sm">
-                <strong className="text-red-400">Jarak: &lt;360,000 km</strong> dari Bumi
+                Jarak minimum Bulan dari pusat Bumi, dihitung dari ephemeris.
               </p>
               <p className="text-sm">
-                <strong className="text-red-400">Efek Market:</strong> Historis menunjukkan area <strong>TOP/SWING HIGH</strong> → Peluang SELL/Take Profit
+                <strong>Hipotesis market:</strong> sebagian trader memantau area ini sebagai kandidat swing high; bukan sinyal jual otomatis.
               </p>
               <p className="text-sm">
-                <strong className="text-red-400">Contoh dari Video:</strong> 13 Januari 2026 (Peak sebelum turun)
+                Arah pasar tidak diturunkan dari posisi Bulan oleh algoritma ini.
               </p>
             </div>
 
             <div className="bg-purple-900/30 border border-purple-500/30 rounded-lg p-3">
               <p className="font-semibold text-purple-300 mb-1">⚠️ Catatan Penting:</p>
               <ul className="text-sm space-y-1 ml-4">
-                <li>• <strong>Badge "✓ Video":</strong> Data terverifikasi dari video Astronacci (Agustus 2025 - Februari 2026)</li>
-                <li>• <strong>Tanpa Badge:</strong> Dihitung otomatis dengan algoritma Apogee-Perigee (siklus ~27.55 hari)</li>
-                <li>• <strong>±1 Hari:</strong> Toleransi waktu 1 hari sebelum/sesudah tanggal Apogee</li>
+                <li>• <strong>Badge Ephemeris:</strong> tanggal, waktu, dan jarak dihitung oleh Astronomy Engine.</li>
+                <li>• <strong>Timezone:</strong> tanggal kalender menggunakan UTC agar konsisten di semua perangkat.</li>
+                <li>• <strong>Presisi:</strong> tidak memakai interval rata-rata 27,55 hari atau anchor manual.</li>
                 <li>• <strong>Konfirmasi Price Action:</strong> Harus ada candlestick pattern (pin bar, inside bar, ekor panjang)</li>
-                <li>• <strong>Fungsi sebagai Filter:</strong> Bukan ramalan pasti, tapi alat untuk timing entry yang lebih baik</li>
-                <li>• <strong>"Market Merah Ingat Astronacci":</strong> Saat market turun, cek apakah mendekati tanggal Apogee untuk cari bottom</li>
+                <li>• <strong>Fungsi:</strong> event astronomi adalah data; pengaruh terhadap market masih hipotesis yang perlu backtest.</li>
               </ul>
             </div>
           </div>
@@ -254,7 +178,7 @@ const TimeTradingCalendar = () => {
                 ))}
               </select>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <label className="text-white font-medium text-sm md:text-base whitespace-nowrap">Tahun:</label>
               <select
@@ -277,7 +201,7 @@ const TimeTradingCalendar = () => {
             <Star className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
             <span className="text-sm md:text-2xl">Apogee-Perigee Points - {months[selectedMonth]} {selectedYear}</span>
           </h2>
-          
+
           {apogeeData.length > 0 ? (
             <div className="overflow-x-auto -mx-4 md:mx-0">
               <div className="inline-block min-w-full align-middle">
@@ -300,7 +224,7 @@ const TimeTradingCalendar = () => {
                               {months[selectedMonth]} {event.day}
                               {event.verified && (
                                 <span className="ml-2 text-[10px] bg-yellow-600/30 text-yellow-300 px-2 py-0.5 rounded-full">
-                                  ✓ Video
+                                  Ephemeris
                                 </span>
                               )}
                             </span>
@@ -314,18 +238,16 @@ const TimeTradingCalendar = () => {
                             </div>
                           </td>
                           <td className="py-3 md:py-4 px-2 md:px-4 hidden lg:table-cell">
-                            <span className={`text-xs md:text-sm font-semibold ${
-                              event.distance?.includes('>') ? 'text-green-400' : 'text-red-400'
-                            }`}>
+                            <span className={`text-xs md:text-sm font-semibold ${event.type === 'Apogee' ? 'text-green-400' : 'text-red-400'
+                              }`}>
                               {event.distance}
                             </span>
                           </td>
                           <td className="py-3 md:py-4 px-2 md:px-4 hidden lg:table-cell">
-                            <span className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium ${
-                              event.confidence === 'high' ? 'bg-green-500/20 text-green-400' :
-                              event.confidence === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                              'bg-gray-500/20 text-gray-400'
-                            }`}>
+                            <span className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium ${event.confidence === 'high' ? 'bg-green-500/20 text-green-400' :
+                                event.confidence === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                                  'bg-gray-500/20 text-gray-400'
+                              }`}>
                               {event.confidence}
                             </span>
                           </td>
@@ -350,7 +272,7 @@ const TimeTradingCalendar = () => {
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 text-center">
             {months[selectedMonth]} {selectedYear}
           </h2>
-          
+
           <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div key={day} className="text-center text-gray-400 font-medium py-1 md:py-2 text-xs md:text-base">
@@ -359,37 +281,35 @@ const TimeTradingCalendar = () => {
               </div>
             ))}
           </div>
-          
+
           {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className="grid grid-cols-7 gap-1 md:gap-2 mb-1 md:mb-2">
               {week.map((day, dayIndex) => {
                 if (!day) {
                   return <div key={dayIndex} className="aspect-square" />;
                 }
-                
+
                 const hasEvent = day.event;
                 const isToday = isCurrentMonth && day.day === currentDay;
-                
+
                 return (
                   <div
                     key={dayIndex}
-                    className={`aspect-square rounded-lg p-1 md:p-2 flex flex-col items-center justify-center transition-all hover:scale-105 cursor-pointer relative ${
-                      hasEvent 
-                        ? `border-2 ${getEventBg(day.event.type)}` 
+                    className={`aspect-square rounded-lg p-1 md:p-2 flex flex-col items-center justify-center transition-all hover:scale-105 cursor-pointer relative ${hasEvent
+                        ? `border-2 ${getEventBg(day.event.type)}`
                         : 'bg-slate-700/50 border border-slate-600'
-                    } ${isToday ? 'ring-2 ring-blue-400' : ''}`}
+                      } ${isToday ? 'ring-2 ring-blue-400' : ''}`}
                     title={hasEvent ? `${day.event.type}: ${day.event.description}` : ''}
                   >
-                    <div className={`font-medium text-xs md:text-sm mb-0.5 ${
-                      hasEvent ? getEventColor(day.event.type) : 'text-white'
-                    }`}>
+                    <div className={`font-medium text-xs md:text-sm mb-0.5 ${hasEvent ? getEventColor(day.event.type) : 'text-white'
+                      }`}>
                       {day.day}
                     </div>
                     {hasEvent && (
                       <div className="flex flex-col items-center gap-0.5">
                         {getEventIcon(day.event.type)}
                         <div className={`text-[8px] md:text-[10px] text-center leading-tight ${getEventColor(day.event.type)}`}>
-                          {hasEvent.distance?.includes('>') ? 'Apogee' : 'Perigee'}
+                              {hasEvent.type}
                         </div>
                       </div>
                     )}
@@ -408,11 +328,11 @@ const TimeTradingCalendar = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-500 flex-shrink-0" />
-              <span className="text-gray-300 text-sm md:text-base">Apogee (&gt;430k km) - Bottom/Buy Zone</span>
+              <span className="text-gray-300 text-sm md:text-base">Apogee — jarak maksimum Bulan</span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingDown className="w-4 h-4 md:w-5 md:h-5 text-red-500 flex-shrink-0" />
-              <span className="text-gray-300 text-sm md:text-base">Perigee (&lt;360k km) - Top/Sell Zone</span>
+              <span className="text-gray-300 text-sm md:text-base">Perigee — jarak minimum Bulan</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 md:w-5 md:h-5 bg-blue-400 rounded-full flex-shrink-0" />
@@ -423,9 +343,8 @@ const TimeTradingCalendar = () => {
 
         <div className="mt-4 md:mt-6 bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-3 md:p-4">
           <p className="text-yellow-200 text-xs md:text-sm text-center">
-            ⚠️ Disclaimer: Tanggal dengan badge "✓ Video" adalah data terverifikasi dari Astronacci YouTube (Agustus 2025 - Februari 2026). 
-            Tanggal lainnya dihitung otomatis menggunakan algoritma Apogee-Perigee dengan siklus lunar ~27.55 hari dari base date 13 Jan 2024.
-            Time Trading adalah timing tool, bukan jaminan pergerakan harga. Selalu konfirmasi dengan price action & gunakan risk management. DYOR!
+            Data astronomi dihitung menggunakan Astronomy Engine 2.1.19 dan disimpan sebagai ephemeris UTC.
+            Korelasi dengan harga bukan hubungan sebab-akibat dan bukan rekomendasi transaksi.
           </p>
         </div>
       </div>
