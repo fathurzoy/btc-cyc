@@ -4,18 +4,66 @@ import React, { useState, useMemo } from 'react';
 import { Star, Eclipse, Sun, Moon, Info } from 'lucide-react';
 import astronomyData from '../data/astronomy-events.json';
 
+const getMarketSignal = (type) => {
+  if (type.includes('Solar Eclipse')) {
+    return {
+      bias: 'Bearish',
+      action: 'Jual / kurangi risiko',
+      confidence: 'Medium',
+      description: 'Bias defensif: solar eclipse dipakai sebagai area volatilitas tinggi dan potensi tekanan turun. Cari konfirmasi breakdown sebelum entry sell.',
+    };
+  }
+
+  if (type.includes('Lunar Eclipse')) {
+    return {
+      bias: 'Reversal',
+      action: 'Tunggu konfirmasi',
+      confidence: 'Low–Medium',
+      description: 'Bias pembalikan: lunar eclipse lebih cocok sebagai zona reversal. Buy jika harga membentuk higher-low/support; sell jika gagal di resistance.',
+    };
+  }
+
+  if (type.includes('Vernal Equinox') || type.includes('Winter Solstice')) {
+    return {
+      bias: 'Bullish',
+      action: 'Beli bertahap',
+      confidence: 'Low',
+      description: 'Bias akumulasi/risk-on musiman. Lebih aman dipakai sebagai window buy bertahap setelah ada konfirmasi struktur naik.',
+    };
+  }
+
+  if (type.includes('Summer Solstice') || type.includes('Autumnal Equinox')) {
+    return {
+      bias: 'Bearish',
+      action: 'Jual / take profit',
+      confidence: 'Low',
+      description: 'Bias distribusi/risk-off musiman. Lebih aman dipakai sebagai window take profit atau sell setelah ada konfirmasi pelemahan.',
+    };
+  }
+
+  return {
+    bias: 'Neutral',
+    action: 'Observasi',
+    confidence: 'Low',
+    description: 'Tidak ada bias market eksplisit. Gunakan hanya sebagai penanda waktu riset.',
+  };
+};
+
 const astroData = astronomyData.events.map(event => {
   const date = new Date(event.at);
+  const signal = getMarketSignal(event.type);
+
   return {
     year: date.getUTCFullYear(),
     month: date.getUTCMonth(),
     day: date.getUTCDate(),
     time: date.toISOString().slice(11, 16),
     type: event.type,
-    description: event.kind === 'eclipse'
-      ? 'Peristiwa gerhana astronomis. Dampak terhadap market tidak diasumsikan.'
-      : 'Peristiwa musim astronomis. Dampak terhadap market tidak diasumsikan.',
-    impact: event.kind === 'eclipse' ? 'high' : 'neutral',
+    description: signal.description,
+    bias: signal.bias,
+    action: signal.action,
+    confidence: signal.confidence,
+    impact: signal.bias,
   };
 });
 
@@ -38,16 +86,18 @@ const AstroEventsCalendar = () => {
 
   const getEventColor = (impact) => {
     switch (impact) {
-      case 'high': return 'text-yellow-400';
-      case 'warning': return 'text-red-400';
+      case 'Bullish': return 'text-green-400';
+      case 'Bearish': return 'text-red-400';
+      case 'Reversal': return 'text-yellow-400';
       default: return 'text-blue-400';
     }
   };
 
   const getEventBg = (impact) => {
     switch (impact) {
-      case 'high': return 'bg-yellow-900/30 border-yellow-500/50';
-      case 'warning': return 'bg-red-900/30 border-red-500/50';
+      case 'Bullish': return 'bg-green-900/30 border-green-500/50';
+      case 'Bearish': return 'bg-red-900/30 border-red-500/50';
+      case 'Reversal': return 'bg-yellow-900/30 border-yellow-500/50';
       default: return 'bg-blue-900/30 border-blue-500/50';
     }
   };
@@ -101,7 +151,7 @@ const AstroEventsCalendar = () => {
             <Eclipse className="w-8 h-8 md:w-10 md:h-10 text-yellow-400" />
           </div>
           <p className="text-gray-300 text-sm md:text-lg px-4">
-            Kalender gerhana, equinox, dan solstice berbasis ephemeris UTC (2024–2030)
+            Kalender gerhana, equinox, dan solstice berbasis ephemeris UTC (2024–2030) + bias bullish/bearish
           </p>
         </div>
 
@@ -116,15 +166,15 @@ const AstroEventsCalendar = () => {
                 <Sun className="w-4 h-4" /> Gerhana (Eclipses)
               </p>
               <ul className="list-disc pl-5 space-y-1 text-sm text-yellow-100/80">
-                <li><strong>Solar Eclipse:</strong> gerhana Matahari global yang dihitung secara astronomis.</li>
-                <li><strong>Lunar Eclipse:</strong> gerhana Bulan penumbral, parsial, atau total.</li>
+                <li><strong>Solar Eclipse:</strong> bias bearish/defensif — jual atau kurangi risiko jika harga ikut breakdown.</li>
+                <li><strong>Lunar Eclipse:</strong> bias reversal — buy di support atau sell di resistance, wajib tunggu konfirmasi harga.</li>
               </ul>
             </div>
 
             <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-4">
               <p className="font-semibold text-red-300 mb-2">Batas Interpretasi</p>
               <p className="text-sm text-red-100/80">
-                Event astronomi tidak otomatis menghasilkan arah bullish/bearish. Retrograde dihapus karena dataset sebelumnya memakai tanggal acak.
+                Sinyal ini adalah bias timing, bukan kepastian harga. Jangan entry hanya karena event astronomi; cocokkan dengan trend, support/resistance, dan candle confirmation.
               </p>
             </div>
 
@@ -133,9 +183,9 @@ const AstroEventsCalendar = () => {
                 <Star className="w-4 h-4" /> Solar Seasons & Equinoxes
               </p>
               <ul className="list-disc pl-5 space-y-1 text-sm text-blue-100/80">
-                <li><strong>Equinox:</strong> saat Matahari melintasi ekuator langit.</li>
-                <li><strong>Solstice:</strong> deklinasi Matahari mencapai ekstrem tahunan.</li>
-                <li className="text-purple-300 mt-2 list-none">💡 <em>Gunakan sebagai kalender riset. Klaim efek pasar harus dibuktikan melalui backtest terpisah.</em></li>
+                <li><strong>Vernal Equinox & Winter Solstice:</strong> bias bullish — buy bertahap setelah struktur harga menguat.</li>
+                <li><strong>Summer Solstice & Autumnal Equinox:</strong> bias bearish — jual/take profit setelah struktur harga melemah.</li>
+                <li className="text-purple-300 mt-2 list-none">💡 <em>Gunakan sebagai filter waktu. Trigger tetap dari chart, bukan dari astrologi saja.</em></li>
               </ul>
             </div>
           </div>
@@ -187,6 +237,8 @@ const AstroEventsCalendar = () => {
                   <tr className="border-b border-purple-500/30">
                     <th className="text-left text-gray-300 py-3 px-4">Tanggal</th>
                     <th className="text-left text-gray-300 py-3 px-4">Event</th>
+                    <th className="text-left text-gray-300 py-3 px-4">Bias</th>
+                    <th className="text-left text-gray-300 py-3 px-4">Aksi</th>
                     <th className="text-left text-gray-300 py-3 px-4 hidden md:table-cell">Deskripsi & Prediksi Efek</th>
                   </tr>
                 </thead>
@@ -201,6 +253,13 @@ const AstroEventsCalendar = () => {
                           {getEventIcon(event.type)}
                           <span className={`font-semibold ${getEventColor(event.impact)}`}>{event.type}</span>
                         </div>
+                      </td>
+                      <td className={`py-4 px-4 whitespace-nowrap font-bold ${getEventColor(event.impact)}`}>
+                        {event.bias}
+                      </td>
+                      <td className="py-4 px-4 whitespace-nowrap text-white">
+                        <div>{event.action}</div>
+                        <div className="text-xs text-gray-400">Confidence: {event.confidence}</div>
                       </td>
                       <td className="py-4 px-4 text-gray-300 text-sm hidden md:table-cell">
                         {event.description}
@@ -243,7 +302,7 @@ const AstroEventsCalendar = () => {
                         ? `border-2 ${getEventBg(topEvent.impact)}`
                         : 'bg-slate-700/50 border border-slate-600'
                       } ${isToday ? 'ring-2 ring-blue-400' : ''}`}
-                    title={hasEvents ? dayObj.events.map(e => `${e.type}: ${e.description}`).join(' | ') : ''}
+                    title={hasEvents ? dayObj.events.map(e => `${e.type}: ${e.bias} — ${e.action}. ${e.description}`).join(' | ') : ''}
                   >
                     <div className={`font-medium text-xs md:text-sm mb-0.5 ${hasEvents ? getEventColor(topEvent.impact) : 'text-white'
                       }`}>

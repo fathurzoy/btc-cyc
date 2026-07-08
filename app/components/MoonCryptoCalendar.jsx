@@ -1,174 +1,169 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Moon, Sun, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import astronomyData from '../data/astronomy-events.json';
+
+const phaseMeta = {
+  'New Moon': {
+    emoji: '🌑',
+    trend: 'bullish',
+    action: 'Beli bertahap',
+    confidence: 'medium',
+    description: 'Window akumulasi/risk-on. Dalam lunar market timing, New Moon lebih sering dipakai sebagai area potensi bottom/rebound.',
+    icon: TrendingUp,
+    color: 'text-green-400',
+  },
+  'Waxing Crescent': {
+    emoji: '🌒',
+    trend: 'bullish',
+    action: 'Hold / tambah saat pullback',
+    confidence: 'low',
+    description: 'Fase pemulihan setelah New Moon. Bias masih naik, tetapi trigger tetap dari struktur harga.',
+    icon: TrendingUp,
+    color: 'text-green-300',
+  },
+  'First Quarter': {
+    emoji: '🌓',
+    trend: 'bullish',
+    action: 'Buy breakout / hold',
+    confidence: 'low',
+    description: 'Bias continuation. Cocok dipakai sebagai konfirmasi jika harga sudah membuat higher-high.',
+    icon: TrendingUp,
+    color: 'text-green-400',
+  },
+  'Waxing Gibbous': {
+    emoji: '🌔',
+    trend: 'neutral',
+    action: 'Hold, jangan FOMO',
+    confidence: 'low',
+    description: 'Fase menjelang Full Moon. Momentum bisa masih naik, tetapi risiko reversal mulai meningkat.',
+    icon: Minus,
+    color: 'text-yellow-400',
+  },
+  'Full Moon': {
+    emoji: '🌕',
+    trend: 'bearish',
+    action: 'Jual / take profit',
+    confidence: 'medium',
+    description: 'Window distribusi/reversal. Full Moon lebih cocok sebagai area waspada top lokal, bukan sinyal buy.',
+    icon: TrendingDown,
+    color: 'text-red-400',
+  },
+  'Waning Gibbous': {
+    emoji: '🌖',
+    trend: 'bearish',
+    action: 'Kurangi risiko',
+    confidence: 'low',
+    description: 'Fase pasca Full Moon. Bias melemah sampai harga membuktikan support kuat.',
+    icon: TrendingDown,
+    color: 'text-red-300',
+  },
+  'Last Quarter': {
+    emoji: '🌗',
+    trend: 'bearish',
+    action: 'Sell bounce / wait',
+    confidence: 'low',
+    description: 'Bias koreksi lanjutan. Lebih aman menunggu struktur harga stabil sebelum akumulasi lagi.',
+    icon: TrendingDown,
+    color: 'text-red-400',
+  },
+  'Waning Crescent': {
+    emoji: '🌘',
+    trend: 'neutral',
+    action: 'Siap akumulasi',
+    confidence: 'low',
+    description: 'Fase akhir koreksi menuju New Moon. Mulai pantau support, tetapi belum otomatis buy.',
+    icon: Minus,
+    color: 'text-yellow-400',
+  },
+};
+
+const moonQuarterEvents = astronomyData.moonPhases.map(event => {
+  const date = new Date(event.at);
+
+  return {
+    ...event,
+    date,
+    year: date.getUTCFullYear(),
+    month: date.getUTCMonth(),
+    day: date.getUTCDate(),
+    time: date.toISOString().slice(11, 16),
+  };
+});
+
+const phaseBetweenQuarters = (quarter) => {
+  switch (quarter) {
+    case 0: return 'Waxing Crescent';
+    case 1: return 'Waxing Gibbous';
+    case 2: return 'Waning Gibbous';
+    case 3: return 'Waning Crescent';
+    default: return 'Waning Crescent';
+  }
+};
+
+const getDailyPhaseName = (date, eventForDay) => {
+  if (eventForDay) return eventForDay.phase;
+
+  const utcNoon = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 12);
+  const previousEvent = moonQuarterEvents
+    .filter(event => event.date.getTime() <= utcNoon)
+    .at(-1);
+
+  return phaseBetweenQuarters(previousEvent?.quarter ?? 3);
+};
 
 const MoonCryptoCalendar = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [moonPhases, setMoonPhases] = useState([]);
-  const [predictions, setPredictions] = useState({});
-  const [calendar, setCalendar] = useState([]);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  const years = Array.from({ length: 15 }, (_, i) => 2016 + i);
+  const years = Array.from({ length: 25 }, (_, i) => 2016 + i);
 
-  const calculateMoonPhase = (date) => {
-    let year = date.getFullYear();
-    let month = date.getMonth() + 1;
-    let day = date.getDate();
-    
-    let c, e, jd, b;
-    
-    if (month < 3) {
-      year--;
-      month += 12;
+  const moonPhases = useMemo(() => (
+    moonQuarterEvents
+      .filter(event => event.year === selectedYear && event.month === selectedMonth)
+      .map(event => ({
+        date: event.day,
+        time: event.time,
+        phaseName: event.phase,
+        emoji: phaseMeta[event.phase].emoji,
+        prediction: phaseMeta[event.phase],
+      }))
+  ), [selectedMonth, selectedYear]);
+
+  const calendar = useMemo(() => {
+    const firstDay = new Date(Date.UTC(selectedYear, selectedMonth, 1));
+    const lastDay = new Date(Date.UTC(selectedYear, selectedMonth + 1, 0));
+    const daysInMonth = lastDay.getUTCDate();
+    const startingDayOfWeek = firstDay.getUTCDay();
+    const calendarData = [];
+
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      calendarData.push(null);
     }
-    
-    ++month;
-    c = 365.25 * year;
-    e = 30.6 * month;
-    jd = c + e + day - 694039.09;
-    jd /= 29.5305882;
-    b = parseInt(jd);
-    jd -= b;
-    b = Math.round(jd * 8);
-    
-    if (b >= 8) b = 0;
-    
-    return b;
-  };
 
-  const getMoonPhaseName = (phase) => {
-    const phases = [
-      'New Moon',
-      'Waxing Crescent',
-      'First Quarter',
-      'Waxing Gibbous',
-      'Full Moon',
-      'Waning Gibbous',
-      'Last Quarter',
-      'Waning Crescent'
-    ];
-    return phases[phase];
-  };
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(Date.UTC(selectedYear, selectedMonth, day, 12));
+      const eventForDay = moonQuarterEvents.find(
+        event => event.year === selectedYear && event.month === selectedMonth && event.day === day
+      );
+      const phaseName = getDailyPhaseName(date, eventForDay);
 
-  const getMoonEmoji = (phase) => {
-    const emojis = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
-    return emojis[phase];
-  };
+      calendarData.push({
+        day,
+        date,
+        phaseName,
+        isKeyPhase: Boolean(eventForDay),
+        time: eventForDay?.time,
+        prediction: phaseMeta[phaseName],
+      });
+    }
 
-  const getCryptoPrediction = (phaseName) => {
-    const predictions = {
-      'New Moon': {
-        trend: 'bearish',
-        confidence: 'high',
-        description: 'New cycle begins. Historically shows price correction and accumulation.',
-        icon: TrendingDown,
-        color: 'text-red-500'
-      },
-      'Waxing Crescent': {
-        trend: 'neutral',
-        confidence: 'medium',
-        description: 'Recovery phase. Market starts building momentum.',
-        icon: Minus,
-        color: 'text-yellow-400'
-      },
-      'First Quarter': {
-        trend: 'bullish',
-        confidence: 'medium',
-        description: 'Growing bullish sentiment. Buying pressure increases.',
-        icon: TrendingUp,
-        color: 'text-green-400'
-      },
-      'Waxing Gibbous': {
-        trend: 'bullish',
-        confidence: 'high',
-        description: 'Strong upward momentum. Approaching peak cycle.',
-        icon: TrendingUp,
-        color: 'text-green-500'
-      },
-      'Full Moon': {
-        trend: 'bullish',
-        confidence: 'high',
-        description: 'Peak energy! Historically shows maximum bullish sentiment and price surge.',
-        icon: TrendingUp,
-        color: 'text-green-600'
-      },
-      'Waning Gibbous': {
-        trend: 'neutral',
-        confidence: 'medium',
-        description: 'Post-peak consolidation. Prepare for potential reversal.',
-        icon: Minus,
-        color: 'text-yellow-500'
-      },
-      'Last Quarter': {
-        trend: 'bearish',
-        confidence: 'medium',
-        description: 'Correction phase begins. Selling pressure increases.',
-        icon: TrendingDown,
-        color: 'text-red-400'
-      },
-      'Waning Crescent': {
-        trend: 'bearish',
-        confidence: 'high',
-        description: 'Final correction phase. Bottom formation before new cycle.',
-        icon: TrendingDown,
-        color: 'text-red-600'
-      }
-    };
-    return predictions[phaseName];
-  };
-
-  useEffect(() => {
-    const generateCalendar = () => {
-      const firstDay = new Date(selectedYear, selectedMonth, 1);
-      const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
-      const daysInMonth = lastDay.getDate();
-      const startingDayOfWeek = firstDay.getDay();
-      
-      const calendarData = [];
-      const phases = [];
-      const preds = {};
-      
-      for (let i = 0; i < startingDayOfWeek; i++) {
-        calendarData.push(null);
-      }
-      
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(selectedYear, selectedMonth, day);
-        const phase = calculateMoonPhase(date);
-        const phaseName = getMoonPhaseName(phase);
-        
-        calendarData.push({
-          day,
-          date,
-          phase,
-          phaseName,
-          emoji: getMoonEmoji(phase)
-        });
-        
-        if (phase === 0 || phase === 4) {
-          phases.push({
-            date: day,
-            phaseName,
-            emoji: getMoonEmoji(phase),
-            prediction: getCryptoPrediction(phaseName)
-          });
-        }
-        
-        preds[day] = getCryptoPrediction(phaseName);
-      }
-      
-      setMoonPhases(phases);
-      setPredictions(preds);
-      setCalendar(calendarData);
-    };
-
-    generateCalendar();
+    return calendarData;
   }, [selectedMonth, selectedYear]);
 
   const weeks = [];
@@ -188,7 +183,7 @@ const MoonCryptoCalendar = () => {
             <Sun className="w-8 h-8 md:w-10 md:h-10 text-yellow-400" />
           </div>
           <p className="text-gray-300 text-sm md:text-lg px-4">
-            Prediksi pergerakan cryptocurrency berdasarkan fase bulan
+            Kalender fase bulan berbasis ephemeris UTC + bias trading lunar
           </p>
         </div>
 
@@ -242,6 +237,7 @@ const MoonCryptoCalendar = () => {
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base">Tanggal</th>
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base">Fase</th>
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base">Prediksi</th>
+                        <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base">Aksi</th>
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base hidden lg:table-cell">Confidence</th>
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base hidden xl:table-cell">Deskripsi</th>
                       </tr>
@@ -253,7 +249,7 @@ const MoonCryptoCalendar = () => {
                           <tr key={index} className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
                             <td className="py-3 md:py-4 px-2 md:px-4">
                               <span className="text-white font-medium text-xs md:text-base whitespace-nowrap">
-                                {months[selectedMonth]} {phase.date}
+                                {months[selectedMonth]} {phase.date} · {phase.time} UTC
                               </span>
                             </td>
                             <td className="py-3 md:py-4 px-2 md:px-4">
@@ -270,11 +266,13 @@ const MoonCryptoCalendar = () => {
                                 </span>
                               </div>
                             </td>
+                            <td className="py-3 md:py-4 px-2 md:px-4 text-white text-xs md:text-base whitespace-nowrap">
+                              {phase.prediction.action}
+                            </td>
                             <td className="py-3 md:py-4 px-2 md:px-4 hidden lg:table-cell">
                               <span className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium ${
-                                phase.prediction.confidence === 'high' ? 'bg-green-500/20 text-green-400' :
                                 phase.prediction.confidence === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                                'bg-red-500/20 text-red-400'
+                                'bg-blue-500/20 text-blue-400'
                               }`}>
                                 {phase.prediction.confidence}
                               </span>
@@ -292,7 +290,7 @@ const MoonCryptoCalendar = () => {
             </div>
           ) : (
             <p className="text-gray-400 text-center py-4 text-sm md:text-base">
-              Tidak ada New Moon atau Full Moon di bulan ini
+              Tidak ada quarter moon event di bulan ini
             </p>
           )}
         </div>
@@ -318,24 +316,24 @@ const MoonCryptoCalendar = () => {
                   return <div key={dayIndex} className="aspect-square" />;
                 }
                 
-                const prediction = predictions[day.day];
-                const Icon = prediction?.icon;
-                const isSpecialPhase = day.phase === 0 || day.phase === 4;
+                const prediction = day.prediction;
+                const Icon = prediction.icon;
                 
                 return (
                   <div
                     key={dayIndex}
                     className={`aspect-square rounded-lg p-1 md:p-2 flex flex-col items-center justify-center transition-all hover:scale-105 cursor-pointer ${
-                      isSpecialPhase 
+                      day.isKeyPhase 
                         ? 'bg-purple-600/30 border-2 border-purple-400' 
                         : 'bg-slate-700/50 border border-slate-600'
                     }`}
+                    title={`${day.phaseName}${day.time ? ` · ${day.time} UTC` : ''}: ${prediction.trend} — ${prediction.action}`}
                   >
                     <div className="text-white font-medium text-xs md:text-sm mb-0.5 md:mb-1">
                       {day.day}
                     </div>
                     <div className="text-lg md:text-2xl mb-0.5 md:mb-1">
-                      {day.emoji}
+                      {prediction.emoji}
                     </div>
                     {Icon && (
                       <Icon className={`w-3 h-3 md:w-4 md:h-4 ${prediction.color}`} />
@@ -364,15 +362,15 @@ const MoonCryptoCalendar = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-purple-400 rounded flex-shrink-0" />
-              <span className="text-gray-300 text-sm md:text-base">New/Full Moon</span>
+              <span className="text-gray-300 text-sm md:text-base">Quarter Moon Event</span>
             </div>
           </div>
         </div>
 
         <div className="mt-4 md:mt-6 bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-3 md:p-4">
           <p className="text-yellow-200 text-xs md:text-sm text-center">
-            ⚠️ Disclaimer: Prediksi ini hanya untuk tujuan edukasi dan hiburan. 
-            Selalu lakukan riset sendiri (DYOR) sebelum melakukan investasi cryptocurrency.
+            ⚠️ Disclaimer: Sinyal fase bulan adalah bias timing, bukan kepastian arah harga. 
+            Entry tetap perlu konfirmasi chart, risk management, dan DYOR.
           </p>
         </div>
       </div>
