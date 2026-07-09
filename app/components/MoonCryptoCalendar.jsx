@@ -6,75 +6,83 @@ import astronomyData from '../data/astronomy-events.json';
 const phaseMeta = {
   'New Moon': {
     emoji: '🌑',
-    trend: 'bullish',
-    action: 'Beli bertahap',
+    phaseType: 'New Moon',
+    trend: 'bearish',
+    action: 'Wait / akumulasi kecil',
     confidence: 'medium',
-    description: 'Window akumulasi/risk-on. Dalam lunar market timing, New Moon lebih sering dipakai sebagai area potensi bottom/rebound.',
-    icon: TrendingUp,
-    color: 'text-green-400',
+    description: 'New Moon: awal siklus bulan. Bias market dibuat defensif/akumulasi karena sering dibaca sebagai fase reset sebelum momentum baru terbentuk.',
+    icon: TrendingDown,
+    color: 'text-red-400',
   },
   'Waxing Crescent': {
     emoji: '🌒',
-    trend: 'bullish',
-    action: 'Hold / tambah saat pullback',
+    phaseType: 'Moon Phase',
+    trend: 'neutral',
+    action: 'Pantau recovery',
     confidence: 'low',
-    description: 'Fase pemulihan setelah New Moon. Bias masih naik, tetapi trigger tetap dari struktur harga.',
-    icon: TrendingUp,
-    color: 'text-green-300',
+    description: 'Moon phase transisi setelah New Moon. Bias mulai recovery, tapi belum cukup kuat untuk sinyal buy agresif.',
+    icon: Minus,
+    color: 'text-yellow-400',
   },
   'First Quarter': {
     emoji: '🌓',
+    phaseType: 'Half Moon / First Quarter',
     trend: 'bullish',
     action: 'Buy breakout / hold',
-    confidence: 'low',
-    description: 'Bias continuation. Cocok dipakai sebagai konfirmasi jika harga sudah membuat higher-high.',
+    confidence: 'medium',
+    description: 'Half Moon / First Quarter: separuh bulan terang. Bias bullish continuation jika harga berhasil breakout atau membentuk higher-high.',
     icon: TrendingUp,
     color: 'text-green-400',
   },
   'Waxing Gibbous': {
     emoji: '🌔',
-    trend: 'neutral',
-    action: 'Hold, jangan FOMO',
+    phaseType: 'Moon Phase',
+    trend: 'bullish',
+    action: 'Hold / ikut momentum',
     confidence: 'low',
-    description: 'Fase menjelang Full Moon. Momentum bisa masih naik, tetapi risiko reversal mulai meningkat.',
-    icon: Minus,
-    color: 'text-yellow-400',
+    description: 'Moon phase menjelang Full Moon. Bias masih naik karena momentum menuju fase puncak, tapi jangan FOMO dekat resistance.',
+    icon: TrendingUp,
+    color: 'text-green-500',
   },
   'Full Moon': {
     emoji: '🌕',
-    trend: 'bearish',
-    action: 'Jual / take profit',
+    phaseType: 'Full Moon',
+    trend: 'bullish',
+    action: 'Hold / take profit bertahap',
     confidence: 'medium',
-    description: 'Window distribusi/reversal. Full Moon lebih cocok sebagai area waspada top lokal, bukan sinyal buy.',
-    icon: TrendingDown,
-    color: 'text-red-400',
+    description: 'Full Moon: bulan penuh. Bias bullish/peak energy; cocok untuk ikut momentum, tapi mulai siapkan take profit karena risiko puncak lokal meningkat.',
+    icon: TrendingUp,
+    color: 'text-green-500',
   },
   'Waning Gibbous': {
     emoji: '🌖',
-    trend: 'bearish',
-    action: 'Kurangi risiko',
+    phaseType: 'Moon Phase',
+    trend: 'neutral',
+    action: 'Take profit / wait',
     confidence: 'low',
-    description: 'Fase pasca Full Moon. Bias melemah sampai harga membuktikan support kuat.',
-    icon: TrendingDown,
-    color: 'text-red-300',
+    description: 'Moon phase setelah Full Moon. Bias mulai konsolidasi; momentum naik bisa melemah, jadi lebih aman kurangi risiko bertahap.',
+    icon: Minus,
+    color: 'text-yellow-500',
   },
   'Last Quarter': {
     emoji: '🌗',
+    phaseType: 'Half Moon / Last Quarter',
     trend: 'bearish',
     action: 'Sell bounce / wait',
-    confidence: 'low',
-    description: 'Bias koreksi lanjutan. Lebih aman menunggu struktur harga stabil sebelum akumulasi lagi.',
+    confidence: 'medium',
+    description: 'Half Moon / Last Quarter: separuh bulan terang di fase turun. Bias bearish/correction sampai market membentuk support baru.',
     icon: TrendingDown,
     color: 'text-red-400',
   },
   'Waning Crescent': {
     emoji: '🌘',
-    trend: 'neutral',
-    action: 'Siap akumulasi',
+    phaseType: 'Moon Phase',
+    trend: 'bearish',
+    action: 'Wait / cari bottom',
     confidence: 'low',
-    description: 'Fase akhir koreksi menuju New Moon. Mulai pantau support, tetapi belum otomatis buy.',
-    icon: Minus,
-    color: 'text-yellow-400',
+    description: 'Moon phase akhir sebelum New Moon. Bias bearish melemah; mulai pantau bottom, tapi belum otomatis buy.',
+    icon: TrendingDown,
+    color: 'text-red-500',
   },
 };
 
@@ -132,6 +140,7 @@ const MoonCryptoCalendar = () => {
         phaseName: event.phase,
         emoji: phaseMeta[event.phase].emoji,
         prediction: phaseMeta[event.phase],
+        phaseType: phaseMeta[event.phase].phaseType,
       }))
   ), [selectedMonth, selectedYear]);
 
@@ -160,6 +169,7 @@ const MoonCryptoCalendar = () => {
         isKeyPhase: Boolean(eventForDay),
         time: eventForDay?.time,
         prediction: phaseMeta[phaseName],
+        phaseType: phaseMeta[phaseName].phaseType,
       });
     }
 
@@ -236,6 +246,7 @@ const MoonCryptoCalendar = () => {
                       <tr className="border-b border-purple-500/30">
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base">Tanggal</th>
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base">Fase</th>
+                        <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base hidden md:table-cell">Tipe Fase</th>
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base">Prediksi</th>
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base">Aksi</th>
                         <th className="text-left text-gray-300 py-2 md:py-3 px-2 md:px-4 text-xs md:text-base hidden lg:table-cell">Confidence</th>
@@ -257,6 +268,11 @@ const MoonCryptoCalendar = () => {
                                 <span className="text-2xl md:text-3xl">{phase.emoji}</span>
                                 <span className="text-gray-300 text-xs md:text-base hidden sm:inline">{phase.phaseName}</span>
                               </div>
+                            </td>
+                            <td className="py-3 md:py-4 px-2 md:px-4 hidden md:table-cell">
+                              <span className="px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium bg-purple-500/20 text-purple-300 whitespace-nowrap">
+                                {phase.phaseType}
+                              </span>
                             </td>
                             <td className="py-3 md:py-4 px-2 md:px-4">
                               <div className="flex items-center gap-1 md:gap-2">
@@ -327,7 +343,7 @@ const MoonCryptoCalendar = () => {
                         ? 'bg-purple-600/30 border-2 border-purple-400' 
                         : 'bg-slate-700/50 border border-slate-600'
                     }`}
-                    title={`${day.phaseName}${day.time ? ` · ${day.time} UTC` : ''}: ${prediction.trend} — ${prediction.action}`}
+                    title={`${day.phaseType}: ${day.phaseName}${day.time ? ` · ${day.time} UTC` : ''}. ${prediction.trend} — ${prediction.action}`}
                   >
                     <div className="text-white font-medium text-xs md:text-sm mb-0.5 md:mb-1">
                       {day.day}
@@ -347,7 +363,7 @@ const MoonCryptoCalendar = () => {
 
         <div className="mt-4 md:mt-6 bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-purple-500/20">
           <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4">Legend</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-500 flex-shrink-0" />
               <span className="text-gray-300 text-sm md:text-base">Bullish Trend</span>
@@ -363,6 +379,21 @@ const MoonCryptoCalendar = () => {
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-purple-400 rounded flex-shrink-0" />
               <span className="text-gray-300 text-sm md:text-base">Quarter Moon Event</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            <div className="bg-slate-700/40 rounded-lg p-3 border border-slate-600">
+              <p className="text-purple-300 font-semibold mb-1">New Moon / Full Moon</p>
+              <p className="text-gray-300">Fase utama: bulan baru dan bulan penuh. Dipakai sebagai titik siklus paling kuat.</p>
+            </div>
+            <div className="bg-slate-700/40 rounded-lg p-3 border border-slate-600">
+              <p className="text-purple-300 font-semibold mb-1">Half Moon / Quarter</p>
+              <p className="text-gray-300">First Quarter dan Last Quarter. Secara visual bulan terlihat setengah.</p>
+            </div>
+            <div className="bg-slate-700/40 rounded-lg p-3 border border-slate-600">
+              <p className="text-purple-300 font-semibold mb-1">Moon Phase</p>
+              <p className="text-gray-300">Fase transisi seperti crescent dan gibbous, biasanya lebih rendah confidence-nya.</p>
             </div>
           </div>
         </div>
