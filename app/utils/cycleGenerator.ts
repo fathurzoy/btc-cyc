@@ -67,58 +67,48 @@ export const generateTheoreticalWCL = (): CycleRange[] => {
 
 export const generateTheoreticalDCL = (): CycleRange[] => {
   const ranges: CycleRange[] = [];
-
-  // Anchor: January 20, 2026 12:00 PM (Adjusted +1 day to correct visual shift)
-  // Mathematically center is Jan 19.5, but chart rendering shows -1 day (12-25).
-  // Compensation: Move center to Jan 20.5 (Jan 20 12:00) to render 13-26.
-  const anchorDate = new Date('2026-01-20T12:00:00');
-  const anchorTime = anchorDate.getTime();
-
-  // DCL Formula:
-  // "59-60 bar TF 1D" -> Interval 60 days.
-  const cycleIntervalDays = 60;
-
-  // "±7 bar TF 1D" -> Adjusted to 6.5 days from midday to match exact dates 13-26.
-  // 19.5 - 6.5 = 13.0
-  // 19.5 + 6.5 = 26.0
-  const halfWidthDays = 6.5;
-
   const daysInMs = 86400000;
 
-  // Generate Backward (Pre-2026)
-  for (let i = 1; i <= 60; i++) { // Go back enough to cover 2018
-    const centerTime = anchorTime - (i * cycleIntervalDays * daysInMs);
-    const date = new Date(centerTime);
+  // DCL formula from CycleTheory notes:
+  // - 59-60 bars on 1D timeframe define the next DCL timing.
+  // - The full DCL column spans ±7 daily bars from the expected low.
+  // - The highest-confidence core spans ±3 daily bars from the expected low.
+  // Calibrated examples:
+  // - Jan 2026 DCL window ended on Jan 26 => center Jan 19, window Jan 12-26.
+  // - Current update: Jul 28-Aug 11 => center Aug 4.
+  const cycleIntervalDays = 59.5;
+  const halfWidthDays = 7;
+  const calibratedCenters = [
+    { center: Date.UTC(2026, 0, 19), label: 'DCL Calibrated (Jan 2026)' },
+    { center: Date.UTC(2026, 7, 4), label: 'DCL Calibrated (Jul-Aug 2026)' },
+  ];
+  const centerTimes = new Map<number, string>();
 
-    if (date.getFullYear() < 2018) break;
+  calibratedCenters.forEach(({ center, label }) => centerTimes.set(center, label));
 
+  const projectionAnchor = Date.UTC(2026, 7, 4);
+  for (let i = -60; i <= 30; i++) {
+    const centerTime = projectionAnchor + (i * cycleIntervalDays * daysInMs);
+    const normalized = Date.UTC(
+      new Date(centerTime).getUTCFullYear(),
+      new Date(centerTime).getUTCMonth(),
+      new Date(centerTime).getUTCDate()
+    );
+    const date = new Date(normalized);
+
+    if (date.getUTCFullYear() < 2018 || date.getUTCFullYear() > 2030) continue;
+    if (!centerTimes.has(normalized)) {
+      centerTimes.set(normalized, i < 0 ? `DCL (Pre-${Math.abs(i)})` : `DCL #${i}`);
+    }
+  }
+
+  centerTimes.forEach((label, centerTime) => {
     ranges.push({
       start: new Date(centerTime - (halfWidthDays * daysInMs)),
       end: new Date(centerTime + (halfWidthDays * daysInMs)),
-      label: `DCL (Pre-${i})`
+      label,
     });
-  }
-
-  // Add Anchor
-  ranges.push({
-    start: new Date(anchorTime - (halfWidthDays * daysInMs)),
-    end: new Date(anchorTime + (halfWidthDays * daysInMs)),
-    label: `Anchor DCL (Jan 2026)`
   });
-
-  // Generate Forward (Post-2026)
-  for (let i = 1; i <= 30; i++) {
-    const centerTime = anchorTime + (i * cycleIntervalDays * daysInMs);
-    const date = new Date(centerTime);
-
-    if (date.getFullYear() > 2030) break;
-
-    ranges.push({
-      start: new Date(centerTime - (halfWidthDays * daysInMs)),
-      end: new Date(centerTime + (halfWidthDays * daysInMs)),
-      label: `DCL #${i}`
-    });
-  }
 
   return ranges.sort((a, b) => a.start.getTime() - b.start.getTime());
 };
