@@ -14,6 +14,7 @@ export default function Navbar() {
     { href: '/wcl', label: 'WCL Chart', icon: TrendingUp },
     { href: '/dcl', label: 'DCL Chart', icon: TrendingUp },
     { href: '/moon', label: 'Moon Phases', icon: Moon },
+    { href: '/halving', label: 'Halving Cycle', icon: Star },
     { href: '/ath-atl', label: 'ATH-ATL', icon: BookOpen },
     { href: '/time-trading', label: 'Time Trading', icon: Star },
     { href: '/astrology', label: 'Astro Events', icon: Eclipse },
