@@ -1,6 +1,6 @@
 'use client';
 
-import { Rocket, AlertTriangle, TrendingDown, TrendingUp, Clock, Zap, Calendar, Info, Activity, AlertCircle, History, BarChart2, Target, Cpu, Wallet } from 'lucide-react';
+import { Rocket, AlertTriangle, TrendingDown, TrendingUp, Clock, Zap, Calendar, Info, Activity, AlertCircle, History, BarChart2, Target, Cpu, Wallet, ShieldCheck } from 'lucide-react';
 
 interface HalvingPhase {
   id: number;
@@ -82,11 +82,17 @@ const HALVING_PHASES: HalvingPhase[] = [
 ];
 
 const HALVING_HISTORY = [
-  { era: '1st Halving', date: '28 Nov 2012', reward: '25 BTC', block: '210,000' },
-  { era: '2nd Halving', date: '9 Jul 2016', reward: '12.5 BTC', block: '420,000' },
-  { era: '3rd Halving', date: '11 Mei 2020', reward: '6.25 BTC', block: '630,000' },
-  { era: '4th Halving', date: '20 Apr 2024', reward: '3.125 BTC', block: '840,000' },
-  { era: '5th Halving', date: 'Est. 2028', reward: '1.562 BTC', block: '1,050,000', isFuture: true },
+  { era: '1st Halving', date: '28 Nov 2012', reward: '25 BTC', block: '210,000', survivalPrice: '$12', peakPrice: '$1,150' },
+  { era: '2nd Halving', date: '9 Jul 2016', reward: '12.5 BTC', block: '420,000', survivalPrice: '$650', peakPrice: '$19,900' },
+  { era: '3rd Halving', date: '11 Mei 2020', reward: '6.25 BTC', block: '630,000', survivalPrice: '$8,800', peakPrice: '$69,000' },
+  { era: '4th Halving', date: '20 Apr 2024', reward: '3.125 BTC', block: '840,000', survivalPrice: '~$64,000', peakPrice: '~$125,000' },
+  { era: '5th Halving', date: 'Mar 2028', reward: '1.562 BTC', block: '1,050,000', survivalPrice: '~$250,000+', peakPrice: '~$400K - $500K', isFuture: true },
+  { era: '6th Halving', date: 'Feb 2032', reward: '0.781 BTC', block: '1,260,000', survivalPrice: '~$500,000+', peakPrice: '~$800K - $1M', isFuture: true },
+  { era: '7th Halving', date: 'Jan 2036', reward: '0.390 BTC', block: '1,470,000', survivalPrice: '~$1M+', peakPrice: '~$1.5M - $2M', isFuture: true },
+  { era: '8th Halving', date: 'Des 2039', reward: '0.195 BTC', block: '1,680,000', survivalPrice: '~$2M+', peakPrice: '~$3M - $4M', isFuture: true },
+  { era: '9th Halving', date: 'Nov 2043', reward: '0.097 BTC', block: '1,890,000', survivalPrice: '~$4M+', peakPrice: '~$6M - $8M', isFuture: true },
+  { era: '10th Halving', date: 'Okt 2047', reward: '0.048 BTC', block: '2,100,000', survivalPrice: '~$8M+', peakPrice: '~$12M - $15M', isFuture: true },
+  { era: '11th Halving', date: 'Sep 2051', reward: '0.024 BTC', block: '2,310,000', survivalPrice: '~$16M+', peakPrice: '~$24M - $30M', isFuture: true },
 ];
 
 export default function HalvingCyclePage() {
@@ -129,23 +135,41 @@ export default function HalvingCyclePage() {
             <History className="w-7 h-7 text-blue-400" />
             Sejarah Tanggal Halving
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {HALVING_HISTORY.map((item, idx) => (
               <div key={idx} className={`bg-slate-800/40 backdrop-blur-md rounded-2xl p-4 md:p-5 border ${item.isFuture ? 'border-purple-500/50 bg-purple-900/10' : 'border-slate-700/50'} shadow-lg hover:-translate-y-1 transition-transform`}>
                 <div className="text-xs font-bold text-gray-400 mb-1">{item.era}</div>
                 <div className={`text-base md:text-lg font-bold mb-3 ${item.isFuture ? 'text-purple-400' : 'text-blue-400'}`}>{item.date}</div>
-                <div className="space-y-1.5 text-xs md:text-sm">
-                  <div className="flex flex-col xl:flex-row xl:justify-between text-gray-300 gap-1">
+                <div className="space-y-2 text-xs md:text-sm">
+                  <div className="flex justify-between text-gray-300 gap-1 border-b border-slate-700/50 pb-1">
                     <span>Block:</span>
                     <span className="font-medium text-white">{item.block}</span>
                   </div>
-                  <div className="flex flex-col xl:flex-row xl:justify-between text-gray-300 gap-1">
+                  <div className="flex justify-between text-gray-300 gap-1 border-b border-slate-700/50 pb-1">
                     <span>Reward:</span>
                     <span className="font-medium text-green-400">{item.reward}</span>
                   </div>
+                  <div className="flex justify-between text-gray-300 gap-1 border-b border-slate-700/50 pb-1">
+                    <span className="text-gray-400">Target Impas Penambang:</span>
+                    <span className="font-bold text-orange-400">{item.survivalPrice}</span>
+                  </div>
+                  {item.peakPrice && (
+                    <div className="flex justify-between text-gray-300 gap-1 pt-1">
+                      <span className="text-gray-400">{item.isFuture ? 'Proyeksi ATH Siklus:' : 'Realisasi ATH Siklus:'}</span>
+                      <span className="font-bold text-purple-400">{item.peakPrice}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Diminishing Returns Notice */}
+          <div className="mt-6 bg-blue-900/10 border border-blue-500/30 rounded-xl p-4 md:p-5 flex flex-col md:flex-row gap-4 items-start md:items-center shadow-lg">
+            <Info className="w-6 h-6 text-blue-400 flex-shrink-0 mt-1 md:mt-0" />
+            <p className="text-sm md:text-base text-gray-300 leading-relaxed">
+              <strong>The Law of Diminishing Returns (Hukum Penurunan Hasil):</strong> Semakin besar kapitalisasi pasar (Market Cap) Bitcoin, semakin besar volume uang baru yang dibutuhkan untuk melipatgandakan harga. Akibatnya, persentase kenaikan (ROI) dari dasar menuju puncak akan semakin mengecil di setiap siklusnya (misal: 100x &rarr; 20x &rarr; 8x), meskipun secara nominal dolar Bitcoin terus mencetak rekor harga baru.
+            </p>
           </div>
         </div>
 
@@ -161,12 +185,13 @@ export default function HalvingCyclePage() {
                 <TrendingDown className="w-6 h-6 text-red-400" />
                 <h3 className="text-lg font-bold text-white">Koreksi Bear Market</h3>
               </div>
-              <p className="text-4xl font-extrabold text-red-400 mb-2">-80%</p>
-              <p className="text-sm text-gray-400 mb-5 leading-relaxed">Rata-rata penurunan terdalam dari pucuk ATH menuju dasar bear market.</p>
+              <p className="text-4xl font-extrabold text-red-400 mb-2">Mengecil &darr;</p>
+              <p className="text-sm text-gray-400 mb-5 leading-relaxed">Persentase kejatuhan dari pucuk ATH ke dasar semakin menyusut (Diminishing Volatility).</p>
               <ul className="text-sm text-gray-300 space-y-3 bg-slate-900/50 p-4 rounded-xl">
                 <li className="flex justify-between"><span>Siklus 2014:</span> <span className="text-red-400 font-semibold">-86% <span className="text-gray-500 text-xs">(410 hari)</span></span></li>
                 <li className="flex justify-between"><span>Siklus 2018:</span> <span className="text-red-400 font-semibold">-84% <span className="text-gray-500 text-xs">(362 hari)</span></span></li>
                 <li className="flex justify-between"><span>Siklus 2022:</span> <span className="text-red-400 font-semibold">-77% <span className="text-gray-500 text-xs">(376 hari)</span></span></li>
+                <li className="flex justify-between border-t border-slate-700/50 pt-3 mt-3"><span>Proyeksi 2026:</span> <span className="text-orange-400 font-bold">~ -55% s/d -65%</span></li>
               </ul>
             </div>
 
@@ -280,34 +305,49 @@ export default function HalvingCyclePage() {
             Mengapa Harga "Harus" Naik? (Fundamental)
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gradient-to-br from-orange-900/20 to-slate-900 border border-orange-500/30 rounded-2xl p-6 md:p-8 hover:border-orange-500/60 transition-colors shadow-lg">
-              <div className="flex items-center gap-4 mb-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-orange-900/20 to-slate-900 border border-orange-500/30 rounded-2xl p-6 hover:border-orange-500/60 transition-colors shadow-lg">
+              <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-orange-500/20 rounded-xl">
                   <Zap className="w-6 h-6 text-orange-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Biaya Produksi Penambang</h3>
+                <h3 className="text-lg font-bold text-white">Biaya Produksi Penambang</h3>
               </div>
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4">
-                Setiap Halving, pendapatan penambang (BTC reward) dipotong 50%. Namun, biaya operasional seperti listrik dan <em>hardware</em> tetap atau bahkan naik. Penambang adalah bisnis yang tidak mau merugi.
+              <p className="text-gray-300 text-sm leading-relaxed mb-3">
+                Setiap Halving, pendapatan penambang dipotong 50%. Namun biaya operasional seperti listrik dan <em>hardware</em> terus naik.
               </p>
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4">
-                Agar bisnis tambang tetap jalan (dan jaringan Bitcoin tetap aman), harga market <strong>secara historis terdorong naik</strong> menyesuaikan titik impas (<em>Break-Even Price</em>) baru pasca-halving. Jika biaya produksi rata-rata pasca-halving 2024 naik ke level $70K - $80K, maka cepat atau lambat harga pasar akan menjadikan area tersebut sebagai pijakan dasar (<em>floor price</em>) yang baru.
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Agar jaringan tidak mati, harga market <strong>terdorong naik</strong> menyesuaikan titik impas (<em>Break-Even</em>) baru. Biaya produksi ini perlahan menjadi pijakan dasar (<em>floor price</em>) yang membatasi penurunan harga.
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-900/20 to-slate-900 border border-blue-500/30 rounded-2xl p-6 md:p-8 hover:border-blue-500/60 transition-colors shadow-lg">
-              <div className="flex items-center gap-4 mb-5">
+            <div className="bg-gradient-to-br from-blue-900/20 to-slate-900 border border-blue-500/30 rounded-2xl p-6 hover:border-blue-500/60 transition-colors shadow-lg">
+              <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-blue-500/20 rounded-xl">
                   <Wallet className="w-6 h-6 text-blue-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Koin Mati (Lost Coins) & Kelangkaan</h3>
+                <h3 className="text-lg font-bold text-white">Koin Mati & Kelangkaan Nyata</h3>
               </div>
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4">
-                Maksimal Bitcoin yang diciptakan adalah 21 juta. Namun faktanya, para ahli on-chain memperkirakan <strong>sekitar 3 hingga 4 juta BTC (hampir 20%) telah hilang selamanya</strong> (pemilik meninggal tanpa mewariskan private key, kecelakaan, atau salah kirim wallet).
+              <p className="text-gray-300 text-sm leading-relaxed mb-3">
+                Dari suplai maksimal 21 juta, diperkirakan <strong>~4 juta BTC (20%) telah hilang selamanya</strong> akibat lupa private key, kecelakaan, atau pemilik meninggal.
               </p>
-              <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-4">
-                Dengan peredaran nyata yang jauh lebih langka dari angka di kertas, dipadukan dengan inflasi uang fiat tak terbatas, pemotongan suplai harian dari Halving menciptakan guncangan pasokan (<em>Supply Shock</em>) ganda yang memicu kelangkaan ekstrem di setiap siklus.
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Berkurangnya peredaran secara permanen ini, dipadukan dengan inflasi tak terbatas uang fiat, menciptakan <em>Supply Shock</em> berkelanjutan setiap kali suplai baru dipotong oleh Halving.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-900/20 to-slate-900 border border-purple-500/30 rounded-2xl p-6 hover:border-purple-500/60 transition-colors shadow-lg">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-purple-500/20 rounded-xl">
+                  <ShieldCheck className="w-6 h-6 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Adopsi Makro (Mencegah Crash)</h3>
+              </div>
+              <p className="text-gray-300 text-sm leading-relaxed mb-3">
+                Kejatuhan tragis -80% semakin mustahil berkat <strong>Diminishing Volatility</strong>. Semakin besar market, semakin sulit harga diombang-ambing.
+              </p>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Pilar penahan harga sangat kuat hari ini: Akumulasi absolut Michael Saylor, wacana <em>Strategic Reserve</em> dari pemerintah (Trump), penggunaan masif USDT untuk transaksi global, hingga ledakan tokenisasi saham RWA di DEX (seperti Hyperliquid). Market sudah terlalu "terlembaga" untuk hancur lebur.
               </p>
             </div>
           </div>
@@ -336,40 +376,58 @@ export default function HalvingCyclePage() {
            </div>
         </div>
 
-        {/* Current Cycle Projection */}
-        <div className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 border border-purple-500/40 rounded-2xl p-6 md:p-10 mb-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Current Cycle Status */}
+        <div className="bg-gradient-to-r from-red-900/30 via-slate-900 to-blue-900/30 border border-red-500/30 rounded-2xl p-6 md:p-10 mb-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
           
           <div className="relative z-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 flex items-center gap-3">
-              <Target className="w-8 h-8 text-purple-400" />
-              Proyeksi Siklus Saat Ini (2024 - 2026)
-            </h2>
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+              <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+                <Target className="w-8 h-8 text-red-400" />
+                Status Siklus Saat Ini (Agustus 2026)
+              </h2>
+              <span className="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse flex items-center justify-center w-fit">
+                <span className="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                Live Bear Market
+              </span>
+            </div>
+            
             <p className="text-gray-300 mb-6 text-sm md:text-base leading-relaxed">
-              Berdasarkan hitungan konkrit dari <strong>Statistik Rata-Rata Multi-Siklus</strong> di atas, kita dapat memproyeksikan rentang waktu untuk puncak dan dasar siklus Bitcoin saat ini. Mengingat Halving ke-4 terjadi pada <strong>20 April 2024</strong>, maka:
+              Berdasarkan pergerakan harga, setelah Bitcoin mencapai puncak siklusnya (ATH) pada sekitar <strong>Oktober 2025</strong>, saat ini market sedang berada di fase terdalam dari <strong>Bear Market</strong>. Penambang yang tidak efisien sudah mulai "menyerah" (capitulation).
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="bg-slate-900/70 border border-slate-700/50 rounded-xl p-5 hover:border-purple-500/50 transition-colors">
-                <div className="text-purple-400 text-sm font-bold mb-1 tracking-wider uppercase">Target Puncak (ATH) Berikutnya</div>
-                <div className="text-xl md:text-2xl font-extrabold text-white mb-3">Agustus - Oktober 2025</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="bg-slate-900/70 border border-slate-700/50 rounded-xl p-5 hover:border-red-500/50 transition-colors">
+                <div className="text-gray-400 text-sm font-bold mb-1 tracking-wider uppercase">Fase Terlewati</div>
+                <div className="text-xl md:text-2xl font-extrabold text-white mb-2">~306 Hari</div>
+                <div className="w-full bg-slate-800 rounded-full h-2 mb-2 overflow-hidden">
+                  <div className="bg-red-500 h-full rounded-full transition-all duration-1000" style={{ width: '80%' }}></div>
+                </div>
+                <div className="text-xs text-gray-400 leading-relaxed">
+                  Dihitung sejak 10 Okt 2025. Kita sudah melewati <strong>~80%</strong> dari rentang waktu rata-rata Bear Market historis (370-400 hari).
+                </div>
+              </div>
+
+              <div className="bg-slate-900/70 border border-slate-700/50 rounded-xl p-5 hover:border-red-500/50 transition-colors">
+                <div className="text-red-400 text-sm font-bold mb-1 tracking-wider uppercase">Estimasi Penurunan (Drawdown)</div>
+                <div className="text-xl md:text-2xl font-extrabold text-red-400 mb-3">Target -55% hingga -65%</div>
                 <div className="text-sm text-gray-400 leading-relaxed">
-                  Didapat dengan menambahkan rata-rata historis <strong>~481 hari</strong> setelah 20 April 2024. Fase ini diprediksi menjadi titik euforia tertinggi (Zona merah untuk mulai merealisasikan Take Profit).
+                  Akibat <strong>Diminishing Volatility</strong>, jika ATH kemarin ~$125K, maka dengan harga saat ini (di area <strong>$50K - $60K</strong>), penurunan telah mencapai 50-60%. Ini berarti kita kemungkinan besar <em>sudah menginjak dasar (bottom)</em> Bear Market! Kejatuhan hingga -80% sangat kecil probabilitasnya saat ini.
                 </div>
               </div>
               
-              <div className="bg-slate-900/70 border border-slate-700/50 rounded-xl p-5 hover:border-red-500/50 transition-colors">
-                <div className="text-red-400 text-sm font-bold mb-1 tracking-wider uppercase">Target Dasar (Bottom) Bear Market</div>
-                <div className="text-xl md:text-2xl font-extrabold text-white mb-3">Kuartal 3 - 4 Tahun 2026</div>
+              <div className="bg-slate-900/70 border border-slate-700/50 rounded-xl p-5 hover:border-yellow-500/50 transition-colors">
+                <div className="text-yellow-400 text-sm font-bold mb-1 tracking-wider uppercase">Status Siklus Psikologis</div>
+                <div className="text-xl md:text-2xl font-extrabold text-white mb-3">Zona Akumulasi Emas</div>
                 <div className="text-sm text-gray-400 leading-relaxed">
-                  Didapat dengan memperkirakan koreksi rata-rata <strong>~380 hari</strong> dari puncak ATH 2025 dengan potensi penurunan hingga -80%. Ini adalah titik di mana pasar kembali menyerah (Zona emas untuk akumulasi ulang).
+                  Menjelang Q3-Q4 2026, kepanikan ritel biasanya memuncak sementara "Uang Pintar" (Smart Money) diam-diam mulai mengakumulasi pasokan untuk persiapan siklus 2028.
                 </div>
               </div>
             </div>
             
-            <div className="mt-6 text-xs text-purple-300/70 italic border-l-2 border-purple-500/50 pl-3">
-              *Catatan: Siklus masa kini bisa saja sedikit memanjang (Lengthening Cycle) atau justru memendek akibat adopsi institusi (ETF Spot), namun rata-rata historis ini memberikan fondasi probabilitas yang sangat kuat.
+            <div className="mt-6 text-xs text-red-300/70 italic border-l-2 border-red-500/50 pl-3">
+              *Peringatan: Masa-masa di mana media massa memberitakan "Kripto sudah mati" adalah indikator teknikal paling valid bahwa dasar (bottom) bear market sudah sangat dekat. Tetap waspada.
             </div>
           </div>
         </div>
