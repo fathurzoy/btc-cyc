@@ -128,16 +128,16 @@ export default function Home() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">Daily Cycle Low (DCL)</h3>
               <p className="text-gray-300 mb-4">
-                Titik terendah di timeframe harian dengan periode 60 hari ± 1 minggu (53-67 hari).
+                Titik terendah di timeframe harian dengan cadence 59-60 bar 1D. Window utama memakai ±7 bar harian, dengan core DCL ±3 bar.
               </p>
               <ul className="space-y-2 text-gray-400">
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-400 mt-1">•</span>
-                  <span>Periode: 60 hari ± 1 minggu</span>
+                  <span>Periode: 59-60 bar 1D, window ±7 bar</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-400 mt-1">•</span>
-                  <span>Candle tidak boleh close di bawah DCL</span>
+                  <span>Core DCL: ±3 bar 1D di sekitar expected low</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-400 mt-1">•</span>
