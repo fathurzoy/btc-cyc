@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Calendar, Info, Zap } from 'lucide-react';
 
 interface CyclePhase {
@@ -9,35 +9,53 @@ interface CyclePhase {
   to: string;
   duration: number;
   date: string;
+  startDate: string;
+  endDate: string;
   type: 'ATH' | 'ATL';
   description: string;
   year: number;
 }
 
 const CYCLE_DATA: CyclePhase[] = [
-  { no: 1, from: 'ATL 2015', to: 'ATH 2017', duration: 1064, date: '17 Des 2017', type: 'ATH', description: 'Puncak bull run 2017', year: 2017 },
-  { no: 2, from: 'ATH 2017', to: 'ATL 2018', duration: 364, date: '16 Des 2018', type: 'ATL', description: 'Bear market selesai', year: 2018 },
-  { no: 3, from: 'ATL 2018', to: 'ATH 2021', duration: 1064, date: '10 Nov 2021', type: 'ATH', description: 'Puncak bull run 2021', year: 2021 },
-  { no: 4, from: 'ATH 2021', to: 'ATL 2022', duration: 364, date: '9 Nov 2022', type: 'ATL', description: 'Bear phase 2022', year: 2022 },
-  { no: 5, from: 'ATL 2022', to: 'ATH 2025', duration: 1064, date: '6 Okt 2025', type: 'ATH', description: 'Prediksi puncak siklus saat ini', year: 2025 },
-  { no: 6, from: 'ATH 2025', to: 'ATL 2026', duration: 364, date: '4 Okt 2026', type: 'ATL', description: 'Bear market berikutnya', year: 2026 },
-  { no: 7, from: 'ATL 2026', to: 'ATH 2029', duration: 1064, date: '3 Okt 2029', type: 'ATH', description: 'Bull run baru', year: 2029 },
-  { no: 8, from: 'ATH 2029', to: 'ATL 2030', duration: 364, date: '2 Okt 2030', type: 'ATL', description: 'Koreksi besar', year: 2030 },
-  { no: 9, from: 'ATL 2030', to: 'ATH 2033', duration: 1064, date: '1 Okt 2033', type: 'ATH', description: 'Siklus bull selanjutnya', year: 2033 },
-  { no: 10, from: 'ATH 2033', to: 'ATL 2034', duration: 364, date: '30 Sep 2034', type: 'ATL', description: 'Bear singkat', year: 2034 },
-  { no: 11, from: 'ATL 2034', to: 'ATH 2037', duration: 1064, date: '29 Sep 2037', type: 'ATH', description: 'Bull run kuat', year: 2037 },
-  { no: 12, from: 'ATH 2037', to: 'ATL 2038', duration: 364, date: '27 Sep 2038', type: 'ATL', description: 'Koreksi', year: 2038 },
-  { no: 13, from: 'ATL 2038', to: 'ATH 2041', duration: 1064, date: '26 Sep 2041', type: 'ATH', description: 'Bull market', year: 2041 },
-  { no: 14, from: 'ATH 2041', to: 'ATL 2042', duration: 364, date: '25 Sep 2042', type: 'ATL', description: 'Bear market', year: 2042 },
-  { no: 15, from: 'ATL 2042', to: 'ATH 2045', duration: 1064, date: '24 Sep 2045', type: 'ATH', description: 'Bull run berikutnya', year: 2045 },
-  { no: 16, from: 'ATH 2045', to: 'ATL 2046', duration: 364, date: '23 Sep 2046', type: 'ATL', description: 'Koreksi', year: 2046 },
-  { no: 17, from: 'ATL 2046', to: 'ATH 2049', duration: 1064, date: '22 Sep 2049', type: 'ATH', description: 'Bull market', year: 2049 },
-  { no: 18, from: 'ATH 2049', to: 'ATL 2050', duration: 364, date: '21 Sep 2050', type: 'ATL', description: 'Bear phase', year: 2050 },
+  { no: 1, from: 'ATL 2015', to: 'ATH 2017', duration: 1064, date: '17 Des 2017', startDate: '2015-01-14', endDate: '2017-12-17', type: 'ATH', description: 'Puncak bull run 2017', year: 2017 },
+  { no: 2, from: 'ATH 2017', to: 'ATL 2018', duration: 364, date: '16 Des 2018', startDate: '2017-12-17', endDate: '2018-12-16', type: 'ATL', description: 'Bear market selesai', year: 2018 },
+  { no: 3, from: 'ATL 2018', to: 'ATH 2021', duration: 1064, date: '10 Nov 2021', startDate: '2018-12-16', endDate: '2021-11-10', type: 'ATH', description: 'Puncak bull run 2021', year: 2021 },
+  { no: 4, from: 'ATH 2021', to: 'ATL 2022', duration: 364, date: '9 Nov 2022', startDate: '2021-11-10', endDate: '2022-11-09', type: 'ATL', description: 'Bear phase 2022', year: 2022 },
+  { no: 5, from: 'ATL 2022', to: 'ATH 2025', duration: 1064, date: '6 Okt 2025', startDate: '2022-11-09', endDate: '2025-10-06', type: 'ATH', description: 'Puncak bull run 2025', year: 2025 },
+  { no: 6, from: 'ATH 2025', to: 'ATL 2026', duration: 364, date: '4 Okt 2026', startDate: '2025-10-06', endDate: '2026-10-04', type: 'ATL', description: 'Dasar bear market 2026', year: 2026 },
+  { no: 7, from: 'ATL 2026', to: 'ATH 2029', duration: 1064, date: '3 Okt 2029', startDate: '2026-10-04', endDate: '2029-10-03', type: 'ATH', description: 'Bull run baru (siklus saat ini)', year: 2029 },
+  { no: 8, from: 'ATH 2029', to: 'ATL 2030', duration: 364, date: '2 Okt 2030', startDate: '2029-10-03', endDate: '2030-10-02', type: 'ATL', description: 'Koreksi besar', year: 2030 },
+  { no: 9, from: 'ATL 2030', to: 'ATH 2033', duration: 1064, date: '1 Okt 2033', startDate: '2030-10-02', endDate: '2033-10-01', type: 'ATH', description: 'Siklus bull selanjutnya', year: 2033 },
+  { no: 10, from: 'ATH 2033', to: 'ATL 2034', duration: 364, date: '30 Sep 2034', startDate: '2033-10-01', endDate: '2034-09-30', type: 'ATL', description: 'Bear singkat', year: 2034 },
+  { no: 11, from: 'ATL 2034', to: 'ATH 2037', duration: 1064, date: '29 Sep 2037', startDate: '2034-09-30', endDate: '2037-09-29', type: 'ATH', description: 'Bull run kuat', year: 2037 },
+  { no: 12, from: 'ATH 2037', to: 'ATL 2038', duration: 364, date: '27 Sep 2038', startDate: '2037-09-29', endDate: '2038-09-27', type: 'ATL', description: 'Koreksi', year: 2038 },
+  { no: 13, from: 'ATL 2038', to: 'ATH 2041', duration: 1064, date: '26 Sep 2041', startDate: '2038-09-27', endDate: '2041-09-26', type: 'ATH', description: 'Bull market', year: 2041 },
+  { no: 14, from: 'ATH 2041', to: 'ATL 2042', duration: 364, date: '25 Sep 2042', startDate: '2041-09-26', endDate: '2042-09-25', type: 'ATL', description: 'Bear market', year: 2042 },
+  { no: 15, from: 'ATL 2042', to: 'ATH 2045', duration: 1064, date: '24 Sep 2045', startDate: '2042-09-25', endDate: '2045-09-24', type: 'ATH', description: 'Bull run berikutnya', year: 2045 },
+  { no: 16, from: 'ATH 2045', to: 'ATL 2046', duration: 364, date: '23 Sep 2046', startDate: '2045-09-24', endDate: '2046-09-23', type: 'ATL', description: 'Koreksi', year: 2046 },
+  { no: 17, from: 'ATL 2046', to: 'ATH 2049', duration: 1064, date: '22 Sep 2049', startDate: '2046-09-23', endDate: '2049-09-22', type: 'ATH', description: 'Bull market', year: 2049 },
+  { no: 18, from: 'ATH 2049', to: 'ATL 2050', duration: 364, date: '21 Sep 2050', startDate: '2049-09-22', endDate: '2050-09-21', type: 'ATL', description: 'Bear phase', year: 2050 },
 ];
 
 export default function ATHATLCyclePage() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const currentYear = 2026;
+
+  // Format today as YYYY-MM-DD
+  const [todayStr, setTodayStr] = useState<string>(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
+
+  useEffect(() => {
+    const today = new Date();
+    const currentStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    setTodayStr(currentStr);
+  }, []);
+
+  const currentYear = todayStr ? parseInt(todayStr.split('-')[0], 10) : new Date().getFullYear();
+
+  // Find active cycle: first cycle whose target endDate is greater than or equal to today
+  const currentCycle = CYCLE_DATA.find(c => c.endDate >= todayStr) || CYCLE_DATA[CYCLE_DATA.length - 1];
 
   // Get unique years for ATH and ATL
   const athYears = CYCLE_DATA.filter(c => c.type === 'ATH').map(c => c.year);
@@ -165,10 +183,11 @@ export default function ATHATLCyclePage() {
             
             {/* Timeline Events */}
             <div className="space-y-4 md:space-y-6">
-              {filteredData.map((cycle, index) => {
+              {filteredData.map((cycle) => {
                 const isATH = cycle.type === 'ATH';
-                const isPast = cycle.year <= currentYear;
-                const isCurrent = cycle.year === currentYear;
+                const isCurrent = cycle.no === currentCycle?.no;
+                const isPast = cycle.endDate < todayStr;
+                const isFuture = cycle.startDate > todayStr;
                 
                 return (
                   <div key={cycle.no} className="relative pl-12 md:pl-20">
@@ -186,7 +205,7 @@ export default function ATHATLCyclePage() {
                         : 'from-red-900/30 to-red-800/20 border-red-500/30'
                     } border rounded-xl p-3 md:p-4 lg:p-6 transition-all hover:scale-[1.01] md:hover:scale-[1.02] ${
                       isCurrent ? 'ring-1 md:ring-2 ring-yellow-400 shadow-xl shadow-yellow-400/20' : ''
-                    } ${!isPast ? 'opacity-70' : ''}`}>
+                    } ${isFuture ? 'opacity-70' : ''}`}>
                       <div className="flex flex-col gap-3 md:gap-4">
                         <div className="flex-1">
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
@@ -208,7 +227,7 @@ export default function ATHATLCyclePage() {
                                   SEKARANG
                                 </span>
                               )}
-                              {!isPast && (
+                              {isFuture && (
                                 <span className="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded inline-block">
                                   PREDIKSI
                                 </span>
